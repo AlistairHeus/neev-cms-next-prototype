@@ -4,6 +4,7 @@ import {
     BookDashed,
     BookOpenCheck,
     CheckIcon,
+    Clipboard,
     ClipboardPlus,
     FilePenIcon,
     FolderKanban,
@@ -109,6 +110,14 @@ export const sidebarMenu: MenuItem[] = [
         href: '/assessments',
         icon: <BookOpenCheck className="h-5 w-5" />,
         nested: [
+
+            {
+                id: 'all-assessment',
+                title: 'All Assessments',
+                href: '/assessments/all-assessments',
+                icon: <Clipboard className="h-5 w-5" />
+            },
+
             {
                 id: 'assemble-assessment',
                 title: 'Assemble',
@@ -118,19 +127,19 @@ export const sidebarMenu: MenuItem[] = [
             {
                 id: 'drafts',
                 title: 'Drafts',
-                href: '#',
+                href: '/assessments/drafts',
                 icon: <BookDashed className="h-5 w-5" />
             },
             {
                 id: 'published-asessment',
                 title: 'Published',
-                href: '#',
+                href: '/assessments/published',
                 icon: <FolderKanban className="h-5 w-5" />
             },
             {
                 id: 'review-asessment',
                 title: 'Review',
-                href: '#',
+                href: '/assessments/reviewed',
                 icon: <FolderKanban className="h-5 w-5" />
             },
             

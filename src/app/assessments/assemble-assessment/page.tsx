@@ -1,15 +1,14 @@
 'use client'
 
-import { useState } from "react"
-import { Input } from "@/components/ui/input"
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
-import { ChevronDown, Plus, X } from "lucide-react"
-import { questionGroups as importedQuestionGroups, QuestionGroup, Question } from '@/types/question-groups'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
-import { ToastProvider, Toast, ToastViewport } from "@/components/ui/toast"
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion'
-import { AccordionHeader } from "@radix-ui/react-accordion"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Input } from "@/components/ui/input"
+import { Toast, ToastProvider, ToastViewport } from "@/components/ui/toast"
+import { questionGroups as importedQuestionGroups, Question, QuestionGroup } from '@/types/question-groups'
+import { ChevronDown, Plus, X } from "lucide-react"
+import { useState } from "react"
 
 export default function Component() {
   const [questionGroups, setQuestionGroups] = useState<QuestionGroup[]>(importedQuestionGroups)
