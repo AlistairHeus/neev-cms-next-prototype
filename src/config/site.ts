@@ -8,12 +8,12 @@ export const siteConfig: SiteConfig = {
   description:
     "###",
   keywords: ["Next.js", "React", "Tailwind CSS", "Radix UI", "shadcn/ui"],
-  url: {
-    base: env.NEXT_PUBLIC_APP_URL,
-    author: "#",
-  },
+  // url: {
+  //   base: env.NEXT_PUBLIC_APP_URL,
+  //   author: "#",
+  // },
   links: {
     github: "#",
   },
-  ogImage: `${env.NEXT_PUBLIC_APP_URL}/og.jpg`,
+  // ogImage: `${env.NEXT_PUBLIC_APP_URL}/og.jpg`,
 }
