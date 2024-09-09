@@ -6,6 +6,7 @@ import { Inter } from "next/font/google"
 import { siteConfig } from "@/config/site"
 import { cn } from "@/lib/utils"
 import { ThemeProvider } from "@/components/theme-provider"
+import Sidebar from "@/components/layout/Sidebar"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -79,7 +80,11 @@ export default function RootLayout({ children }: RootLayoutProps) {
           enableSystem
           disableTransitionOnChange
         >
+          <div className="w-full h-full flex">
+
+          <Sidebar/>
           {children}
+          </div>
         </ThemeProvider>
       </body>
     </html>
