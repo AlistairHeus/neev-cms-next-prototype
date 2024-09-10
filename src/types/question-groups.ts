@@ -229,7 +229,7 @@ export const dummyAssessments: Assessment[] = [
     medium: 'Hindi',
     createdBy: 'Jane Smith',
     reviewers: ['Charlie', 'David'],
-    status: 'Completed',
+    status: 'Published',
     questionGroups: [{ questions: ['Q1', 'Q2'] }]
   },
   {
@@ -238,7 +238,7 @@ export const dummyAssessments: Assessment[] = [
     medium: 'French',
     createdBy: 'Samuel Green',
     reviewers: ['Eve', 'Frank'],
-    status: 'In Progress',
+    status: 'Published',
     questionGroups: [{ questions: ['Q1', 'Q2', 'Q3', 'Q4'] }]
   },
   {
@@ -256,7 +256,55 @@ export const dummyAssessments: Assessment[] = [
     medium: 'English',
     createdBy: 'Bruce Wayne',
     reviewers: ['Ivy', 'Jack'],
-    status: 'Completed',
+    status: 'Published',
     questionGroups: [{ questions: ['Q1', 'Q2', 'Q3', 'Q4', 'Q5'] }]
-  }
+  },
+  {
+    id: '6',
+    name: 'Physics Assessment',
+    medium: 'English',
+    createdBy: 'Bruce Wayne',
+    reviewers: ['Ivy', 'Jack'],
+    status: 'Published',
+    questionGroups: [{ questions: ['Q1', 'Q2', 'Q3', 'Q4', 'Q5'] }]
+  },
+  {
+    id: '7',
+    name: 'Physics Assessment',
+    medium: 'English',
+    createdBy: 'Bruce Wayne',
+    reviewers: ['Ivy', 'Jack'],
+    status: 'Published',
+    questionGroups: [{ questions: ['Q1', 'Q2', 'Q3', 'Q4', 'Q5'] }]
+  },
+  {
+    id: '8',
+    name: 'Physics Assessment',
+    medium: 'English',
+    createdBy: 'Bruce Wayne',
+    reviewers: ['Ivy', 'Jack'],
+    status: 'Published',
+    questionGroups: [{ questions: ['Q1', 'Q2', 'Q3', 'Q4', 'Q5'] }]
+  },
+  {
+    id: '9',
+    name: 'Physics Assessment',
+    medium: 'English',
+    createdBy: 'Bruce Wayne',
+    reviewers: ['Ivy', 'Jack'],
+    status: 'Published',
+    questionGroups: [{ questions: ['Q1', 'Q2', 'Q3', 'Q4', 'Q5'] }]
+  },
+  {
+    id: '10',
+    name: 'Physics Assessment',
+    medium: 'English',
+    createdBy: 'Bruce Wayne',
+    reviewers: ['Ivy', 'Jack'],
+    status: 'Published',
+    questionGroups: [{ questions: ['Q1', 'Q2', 'Q3', 'Q4', 'Q5'] }]
+  },
+
+
+  
 ];

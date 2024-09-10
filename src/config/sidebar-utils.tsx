@@ -8,6 +8,7 @@ import {
     ClipboardPlus,
     FilePenIcon,
     FolderKanban,
+    Group,
     LayoutGridIcon,
     SettingsIcon,
     User,
@@ -145,6 +146,13 @@ export const sidebarMenu: MenuItem[] = [
             
         ]
 
+    },
+
+    {
+        id: 'questionGroup',
+        title: 'Question Groups',
+        href: '/question-groups',
+        icon: <Group className="h-5 w-5" />,
     },
     {
         id: 'settings',
