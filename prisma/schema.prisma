@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Assessment {
+  id             Int              @id @default(autoincrement())
+  name           String
+  medium         String
+  createdBy      String
+  reviewers      String[]          // Array of reviewer names
+  status         String
+  questionGroups QuestionGroup[]   // One-to-many relation with QuestionGroup
+}
+
+model QuestionGroup {
+  id            Int           @id @default(autoincrement())
+  name          String
+  questions     Question[]     // One-to-many relation with Question
+  assessment    Assessment?    @relation(fields: [assessmentId], references: [id])
+  assessmentId  Int?           // Optional foreign key to Assessment
+}
+
+model Question {
+  id                        Int          @id @default(autoincrement())
+  question_instruction       String
+  question_instruction_voiceover String
+  question_stem              String
+  question_stem_voiceover    String
+  explanation                String
+  explanation_voiceover      String
+  question_testing_objective String
+  max_score                  Int
+  question_type              String
+  subject_no                 Int
+  class                      Int
+  attributes                 Attribute[]  // One-to-many relation with Attribute
+  questionGroup              QuestionGroup @relation(fields: [questionGroupId], references: [id])
+  questionGroupId            Int           // Foreign key to QuestionGroup
+}
+
+model Attribute {
+  id        Int      @id @default(autoincrement())
+  type      String   // e.g., 'difficulty'
+  value     String   // e.g., 'easy', 'medium', 'hard'
+  question  Question @relation(fields: [questionId], references: [id])
+  questionId Int      // Foreign key to Question
+}

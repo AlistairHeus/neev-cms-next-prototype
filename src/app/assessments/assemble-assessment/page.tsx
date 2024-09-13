@@ -26,14 +26,20 @@ export default function Component() {
   const [sections, setSections] = useState<Section[]>([]) // Manage sections here
   const [newSectionName, setNewSectionName] = useState('')
   const [activeSectionId, setActiveSectionId] = useState<number | null>(null) // Keep track of active section
+  const [isAlertOpen, setIsAlertOpen] = useState(false) // Manage alert dialog
 
   // Handle adding a question group, ensuring no duplicates
   const handleAddQuestionGroup = (questionGroup: QuestionGroup) => {
+    if (sections.length === 0) {
+      setIsAlertOpen(true) // Open the alert dialog if no sections are present
+      return
+    }
+
     if (
       selectedQuestionGroups.some(group => group.id === questionGroup.id) ||
       sections.some(section => section.questionGroups.some(group => group.id === questionGroup.id))
     ) {
-      alert("This question group has already been added.")
+      setIsToastVisible(true) // Show a toast if question group has already been added
       return
     }
 
@@ -44,8 +50,6 @@ export default function Component() {
           ? { ...section, questionGroups: [...section.questionGroups, questionGroup] }
           : section
       ))
-    } else {
-      setSelectedQuestionGroups((prevGroups) => [...prevGroups, questionGroup])
     }
 
     // Remove from the available question groups list
@@ -78,7 +82,7 @@ export default function Component() {
   // Handle creating a new section
   const handleCreateSection = () => {
     if (newSectionName.trim() === '') {
-      alert("Section name cannot be empty.")
+      setIsAlertOpen(true) // Open alert dialog if section name is empty
       return
     }
 
@@ -198,6 +202,12 @@ export default function Component() {
                             <div className="text-xs text-muted-foreground">
                               {question.question_type} | Max Score: {question.max_score}
                             </div>
+                            {/* Display difficulty attribute */}
+                            {question.attributes.map(attr => (
+                              <div key={attr.id} className="text-xs text-muted-foreground">
+                                {attr.type}: {attr.value}
+                              </div>
+                            ))}
                           </div>
                         </div>
                       ))}
@@ -227,48 +237,7 @@ export default function Component() {
             {/* Display sections */}
             {sections.length === 0 && (
               <div>
-                <p className="text-sm text-muted-foreground">No sections created yet.</p>
-                {selectedQuestionGroups.length === 0 && <p className="text-sm text-muted-foreground">No question groups selected yet.</p>}
-                <div className="space-y-4">
-                  {selectedQuestionGroups.map((group) => (
-                    <div key={group.id} className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <div className="text-sm font-medium">{group.name}</div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleRemoveQuestionGroup(group.id)}
-                        >
-                          <X className="w-4 h-4" />
-                          <span className="sr-only">Remove group</span>
-                        </Button>
-                      </div>
-                      <div className="space-y-2">
-                        {group.questions.map((question: Question, index: number) => (
-                          <div
-                            key={index}
-                            className="grid grid-cols-[1fr_auto] items-center gap-4 bg-muted p-4 rounded-md cursor-pointer"
-                          >
-                            <div onClick={() => handleQuestionClick(question)}>
-                              <div className="text-sm font-medium">{question.question_stem}</div>
-                              <div className="text-xs text-muted-foreground">
-                                {question.question_type} | Max Score: {question.max_score}
-                              </div>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleRemoveQuestionGroup(group.id, index)}
-                            >
-                              <X className="w-4 h-4" />
-                              <span className="sr-only">Remove question</span>
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <p className="text-sm text-muted-foreground">No sections created yet. Please create a section to add question groups.</p>
               </div>
             )}
 
@@ -314,6 +283,12 @@ export default function Component() {
                               <div className="text-xs text-muted-foreground">
                                 {question.question_type} | Max Score: {question.max_score}
                               </div>
+                              {/* Display difficulty attribute */}
+                              {question.attributes.map(attr => (
+                                <div key={attr.id} className="text-xs text-muted-foreground">
+                                  {attr.type}: {attr.value}
+                                </div>
+                              ))}
                             </div>
                             <Button
                               variant="ghost"
@@ -347,12 +322,31 @@ export default function Component() {
                   <p><strong>Objective:</strong> {selectedQuestion.question_testing_objective}</p>
                   <p><strong>Max Score:</strong> {selectedQuestion.max_score}</p>
                   <p><strong>Type:</strong> {selectedQuestion.question_type}</p>
+                  {/* Display attributes in dialog */}
+                  {selectedQuestion.attributes.map(attr => (
+                    <div key={attr.id}>
+                      {attr.type}: {attr.value}
+                    </div>
+                  ))}
                 </DialogDescription>
               </DialogHeader>
               <Button variant="secondary" onClick={() => setSelectedQuestion(null)}>Close</Button>
             </DialogContent>
           </Dialog>
         )}
+
+        {/* Alert Dialog for prompting to create a section */}
+        <Dialog open={isAlertOpen} onOpenChange={() => setIsAlertOpen(false)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create a Section</DialogTitle>
+              <DialogDescription>
+                Please create a section before adding question groups.
+              </DialogDescription>
+            </DialogHeader>
+            <Button variant="outline" onClick={() => setIsAlertOpen(false)}>Close</Button>
+          </DialogContent>
+        </Dialog>
 
         {/* Toast UI */}
         {isToastVisible && (
