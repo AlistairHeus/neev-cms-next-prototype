@@ -8,7 +8,7 @@ import { dummyAssessments } from '@/types/question-groups';  // Ensure dummyAsse
 const AllAssessments = () => {
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [viewMode, setViewMode] = useState('table'); // 'table' or 'thumbnail'
+  const [viewMode, setViewMode] = useState('thumbnail'); // 'table' or 'thumbnail'
   const pageSize = 10; // Number of items per page
 
   const filteredAssessments = dummyAssessments.filter(
@@ -33,7 +33,7 @@ const AllAssessments = () => {
   };
 
   return (
-    <div className="p-4 w-full min-h-screen border-2">
+    <div className="p-4 w-full min-h-screen">
       {/* Toggle View Button */}
       <div className="flex justify-between mb-4">
         <Input

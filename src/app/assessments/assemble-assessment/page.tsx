@@ -1,369 +1,172 @@
 'use client'
 
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
-import { Toast, ToastProvider, ToastViewport } from "@/components/ui/toast"
-import { questionGroups as importedQuestionGroups, Question, QuestionGroup } from '@/types/question-groups'
-import { ChevronDown, Plus, X } from "lucide-react"
-import { useState } from "react"
+import { StepOneForm } from '@/components/forms/assessments/assemble-assessments/step-one'
+import StepThreeForm from '@/components/forms/assessments/assemble-assessments/step-three'
+import { StepTwoForm } from '@/components/forms/assessments/assemble-assessments/step-two'
+import { Medium, Project, Subject } from '@/components/forms/form-utils/form-types'
+import { Button } from '@/components/ui/button'
+import { useState } from 'react'
 
-type Section = {
-  id: number;
-  name: string;
-  questionGroups: QuestionGroup[];
-}
-
-export default function Component() {
-  const [questionGroups, setQuestionGroups] = useState<QuestionGroup[]>(importedQuestionGroups)
-  const [selectedQuestionGroups, setSelectedQuestionGroups] = useState<QuestionGroup[]>([])
-  const [subject, setSubject] = useState("English")
-  const [searchTerm, setSearchTerm] = useState('')
-  const [isToastVisible, setIsToastVisible] = useState(false)
-  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null)
-  const [sections, setSections] = useState<Section[]>([]) // Manage sections here
-  const [newSectionName, setNewSectionName] = useState('')
-  const [activeSectionId, setActiveSectionId] = useState<number | null>(null) // Keep track of active section
-  const [isAlertOpen, setIsAlertOpen] = useState(false) // Manage alert dialog
-
-  // Handle adding a question group, ensuring no duplicates
-  const handleAddQuestionGroup = (questionGroup: QuestionGroup) => {
-    if (sections.length === 0) {
-      setIsAlertOpen(true) // Open the alert dialog if no sections are present
-      return
-    }
-
-    if (
-      selectedQuestionGroups.some(group => group.id === questionGroup.id) ||
-      sections.some(section => section.questionGroups.some(group => group.id === questionGroup.id))
-    ) {
-      setIsToastVisible(true) // Show a toast if question group has already been added
-      return
-    }
-
-    // If an active section exists, add to that section
-    if (activeSectionId !== null) {
-      setSections(prevSections => prevSections.map(section =>
-        section.id === activeSectionId
-          ? { ...section, questionGroups: [...section.questionGroups, questionGroup] }
-          : section
-      ))
-    }
-
-    // Remove from the available question groups list
-    setQuestionGroups((prevGroups) => prevGroups.filter(group => group.id !== questionGroup.id))
-  }
-
-  // Handle removing a question group from selected groups or sections
-  const handleRemoveQuestionGroup = (groupId: number, sectionId?: number) => {
-    if (sectionId !== undefined) {
-      const removedGroup = sections
-        .find(section => section.id === sectionId)?.questionGroups
-        .find(group => group.id === groupId)
-      if (removedGroup) {
-        setSections(prevSections => prevSections.map(section =>
-          section.id === sectionId
-            ? { ...section, questionGroups: section.questionGroups.filter(group => group.id !== groupId) }
-            : section
-        ))
-        setQuestionGroups((prevGroups) => [...prevGroups, removedGroup])
-      }
-    } else {
-      const removedGroup = selectedQuestionGroups.find(group => group.id === groupId)
-      if (removedGroup) {
-        setSelectedQuestionGroups((prevGroups) => prevGroups.filter(group => group.id !== groupId))
-        setQuestionGroups((prevGroups) => [...prevGroups, removedGroup])
-      }
-    }
-  }
-
-  // Handle creating a new section
-  const handleCreateSection = () => {
-    if (newSectionName.trim() === '') {
-      setIsAlertOpen(true) // Open alert dialog if section name is empty
-      return
-    }
-
-    const newSection: Section = {
-      id: sections.length + 1,
-      name: newSectionName,
-      questionGroups: []
-    }
-
-    setSections([...sections, newSection])
-    setNewSectionName('')
-    setActiveSectionId(newSection.id) // Set the newly created section as active
-  }
-
-  // Handle removing a section
-  const handleRemoveSection = (sectionId: number) => {
-    const removedSection = sections.find(section => section.id === sectionId)
-    if (removedSection) {
-      // Remove the section and return its question groups back to the available list
-      setQuestionGroups(prevGroups => [...prevGroups, ...removedSection.questionGroups])
-      setSections(prevSections => prevSections.filter(section => section.id !== sectionId))
-
-      // Reset active section if the active section was removed
-      if (activeSectionId === sectionId) {
-        setActiveSectionId(null)
-      }
-    }
-  }
-
-  // Show the toast for saving functionality
-  const handleSave = () => {
-    setIsToastVisible(true)
-
-    // Hide the toast after 5 seconds
-    setTimeout(() => {
-      setIsToastVisible(false)
-    }, 5000)
-  }
-
-  // Handle opening the question dialog when a question is clicked
-  const handleQuestionClick = (question: Question) => {
-    setSelectedQuestion(question)
-  }
-
-  // Filter the question groups based on the search term
-  const filteredQuestionGroups = questionGroups.filter((group) =>
-    group.name.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+const Stepper = ({ currentStep }: { currentStep: number }) => {
+  const steps = ['Assessment Details', 'Select Questions', 'Review & Submit'];
 
   return (
-    <ToastProvider>
-      <div className="flex flex-col h-full w-full">
-        <header className="sticky top-0 bg-primary text-primary-foreground py-4 px-6 flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Assemble Test</h1>
-
-          <div className="flex gap-5">
-            {selectedQuestionGroups.length > 0 && (
-              <Button variant='default' onClick={handleSave}>
-                Save
-              </Button>
-            )}
+    <div className="flex items-center justify-between mb-6 w-full lg:w-2/3 mx-auto">
+      {steps.map((step, index) => (
+        <div key={index} className="flex items-center">
+          {/* Step Number */}
+          <div
+            className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
+              currentStep === index + 1 ? 'bg-black text-white' : 'text-black border-gray-400 border'
+            }`}
+            style={{ minWidth: '2rem', minHeight: '2rem' }}
+          >
+            {index + 1}
           </div>
-        </header>
 
-        <div className="flex flex-1">
-          {/* Left side (Available Question Groups with Accordion) */}
-          <div className="bg-background text-foreground p-6 border-r w-1/2">
-            <div className="flex items-center gap-4 mb-4">
-              <Input
-                type="search"
-                placeholder="Search question groups"
-                className="flex-1"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline">
-                    <ChevronDown className="w-4 h-4 mr-2" />
-                    {subject}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => setSubject("English")}>English</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setSubject("Tamil")}>Tamil</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setSubject("Odia")}>Odia</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+          {/* Step Label */}
+          <span
+            className={`ml-2 font-semibold ${
+              currentStep === index + 1 ? 'text-black' : 'text-gray-500'
+            }`}
+            style={{ whiteSpace: 'nowrap' }}
+          >
+            {step}
+          </span>
+
+          {/* Divider Line */}
+          {index < steps.length - 1 && (
+            <div className="flex items-center mx-4 w-12 lg:w-24">
+              <div className={`w-full h-1 ${currentStep > index + 1 ? 'bg-black' : 'bg-gray-400'}`} />
             </div>
-
-            <Accordion type="single" collapsible>
-              {filteredQuestionGroups.map((questionGroup) => (
-                <AccordionItem key={questionGroup.id} value={String(questionGroup.id)}>
-                  <div className="flex items-center w-full relative">
-                    <div className="w-11/12 ">
-                      <AccordionTrigger className=" w-full">{questionGroup.name}</AccordionTrigger>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      className=" absolute right-0 w-6 h-6 flex items-center justify-center p-1"
-                      onClick={() => handleAddQuestionGroup(questionGroup)}
-                    >
-                      <Plus className="w-full h-full" />
-                    </Button>
-                  </div>
-
-                  <AccordionContent>
-                    <div className="space-y-2 mt-2">
-                      {questionGroup.questions.map((question, index) => (
-                        <div
-                          key={index}
-                          className="grid grid-cols-[1fr_auto] items-center gap-4 bg-muted p-4 rounded-md cursor-pointer"
-                          onClick={() => handleQuestionClick(question)}
-                        >
-                          <div>
-                            <div className="text-sm font-medium">{question.question_stem}</div>
-                            <div className="text-xs text-muted-foreground">
-                              {question.question_type} | Max Score: {question.max_score}
-                            </div>
-                            {/* Display difficulty attribute */}
-                            {question.attributes.map(attr => (
-                              <div key={attr.id} className="text-xs text-muted-foreground">
-                                {attr.type}: {attr.value}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </div>
-
-          {/* Right side (Selected Question Groups and Sections) */}
-          <div className="bg-background text-foreground p-6 flex-1">
-            <div className="text-lg font-medium"><span className="text-muted-foreground">Medium:</span> {subject}</div>
-
-            {/* Section creation */}
-            <div className="mt-4 mb-6">
-              <div className="flex gap-2">
-                <Input
-                  value={newSectionName}
-                  onChange={(e) => setNewSectionName(e.target.value)}
-                  placeholder="Section name"
-                />
-                <Button onClick={handleCreateSection}>Create Section</Button>
-              </div>
-            </div>
-
-            {/* Display sections */}
-            {sections.length === 0 && (
-              <div>
-                <p className="text-sm text-muted-foreground">No sections created yet. Please create a section to add question groups.</p>
-              </div>
-            )}
-
-            {sections.length > 0 && sections.map((section) => (
-              <div key={section.id} className="mb-6">
-                <div className="flex items-center justify-between">
-                  <div className="text-md font-bold mb-2">{section.name}</div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleRemoveSection(section.id)}
-                  >
-                    <X className="w-4 h-4" />
-                    <span className="sr-only">Remove section</span>
-                  </Button>
-                </div>
-                
-                {section.questionGroups.length === 0 && <p className="text-sm text-muted-foreground">No question groups in this section.</p>}
-                <div className="space-y-2">
-                  {section.questionGroups.map((group) => (
-                    <div key={group.id} className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <div className="text-sm font-medium">{group.name}</div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleRemoveQuestionGroup(group.id, section.id)}
-                        >
-                          <X className="w-4 h-4" />
-                          <span className="sr-only">Remove group</span>
-                        </Button>
-                      </div>
-
-                      {/* Display questions inside this question group */}
-                      <div className="space-y-2">
-                        {group.questions.map((question, index) => (
-                          <div
-                            key={index}
-                            className="grid grid-cols-[1fr_auto] items-center gap-4 bg-muted p-4 rounded-md cursor-pointer"
-                          >
-                            <div onClick={() => handleQuestionClick(question)}>
-                              <div className="text-sm font-medium">{question.question_stem}</div>
-                              <div className="text-xs text-muted-foreground">
-                                {question.question_type} | Max Score: {question.max_score}
-                              </div>
-                              {/* Display difficulty attribute */}
-                              {question.attributes.map(attr => (
-                                <div key={attr.id} className="text-xs text-muted-foreground">
-                                  {attr.type}: {attr.value}
-                                </div>
-                              ))}
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleRemoveQuestionGroup(group.id, index)}
-                            >
-                              <X className="w-4 h-4" />
-                              <span className="sr-only">Remove question</span>
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
+          )}
         </div>
+      ))}
+    </div>
+  );
+};
 
-        {/* Question Details Dialog */}
-        {selectedQuestion && (
-          <Dialog open={selectedQuestion !== null} onOpenChange={() => setSelectedQuestion(null)}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Question Details</DialogTitle>
-                <DialogDescription>
-                  <p><strong>Instruction:</strong> {selectedQuestion.question_instruction}</p>
-                  <p><strong>Stem:</strong> {selectedQuestion.question_stem}</p>
-                  <p><strong>Explanation:</strong> {selectedQuestion.explanation}</p>
-                  <p><strong>Objective:</strong> {selectedQuestion.question_testing_objective}</p>
-                  <p><strong>Max Score:</strong> {selectedQuestion.max_score}</p>
-                  <p><strong>Type:</strong> {selectedQuestion.question_type}</p>
-                  {/* Display attributes in dialog */}
-                  {selectedQuestion.attributes.map(attr => (
-                    <div key={attr.id}>
-                      {attr.type}: {attr.value}
-                    </div>
-                  ))}
-                </DialogDescription>
-              </DialogHeader>
-              <Button variant="secondary" onClick={() => setSelectedQuestion(null)}>Close</Button>
-            </DialogContent>
-          </Dialog>
+
+
+
+
+export default function StepperForm() {
+  const [currentStep, setCurrentStep] = useState(1)
+  const [formData, setFormData] = useState({
+    assessmentName: '',
+    project: null as Project | null,
+    grade: null as number | null,
+    subject: null as Subject | null,
+    medium: null as Medium | null
+  })
+
+  const handleNextStep = () => {
+    if (currentStep < 3) setCurrentStep(currentStep + 1)
+  }
+
+  const handlePrevStep = () => {
+    if (currentStep > 1) setCurrentStep(currentStep - 1)
+  }
+
+  const isStepOneValid = () => {
+    const { assessmentName, project, grade, subject, medium } = formData
+    return assessmentName && project && grade && subject && medium
+  }
+
+  const getAvailableGrades = () => {
+    switch (formData.project) {
+      case "Neev":
+        return [1, 2, 3]
+      case "Asset":
+      case "Cares":
+        return [3, 4, 5, 6, 7, 8, 9, 10]
+      default:
+        return []
+    }
+  }
+
+  const getAvailableSubjects = () => {
+    switch (formData.project) {
+      case "Cares":
+        return ["English", "Maths", "Science", "Social Science", "Hindi"]
+      case "Asset":
+        return ["English", "Maths", "Science", "Social Studies", "Hindi"]
+      case "Neev":
+        return ["Foundational Literacy", "Foundational Numeracy"]
+      default:
+        return []
+    }
+  }
+
+  const getAvailableMediums = () => {
+    return ["English", "Hindi", "Gujarati", "Marathi", "Kannada"] // Available mediums (example list)
+  }
+
+  return (
+    <div className="flex justify-center w-full">
+      <div className="w-full bg-white rounded-lg p-6 space-y-6">
+        {/* Stepper Component */}
+        <Stepper currentStep={currentStep} />
+
+        {/* Step 1: Assessment Details */}
+        {currentStep === 1 && (
+          <StepOneForm
+            assessmentName={formData.assessmentName}
+            setAssessmentName={(name: string) => setFormData((prev) => ({ ...prev, assessmentName: name }))}
+            project={formData.project}
+            setProject={(project: Project) => setFormData((prev) => ({ ...prev, project }))}
+            grade={formData.grade}
+            setGrade={(grade: number) => setFormData((prev) => ({ ...prev, grade }))}
+            subject={formData.subject}
+            setSubject={(subject: Subject) => setFormData((prev) => ({ ...prev, subject }))}
+            medium={formData.medium}
+            setMedium={(medium: Medium) => setFormData((prev) => ({ ...prev, medium }))}
+            getAvailableGrades={getAvailableGrades}
+            getAvailableSubjects={getAvailableSubjects}
+            getAvailableMediums={getAvailableMediums}
+          />
         )}
 
-        {/* Alert Dialog for prompting to create a section */}
-        <Dialog open={isAlertOpen} onOpenChange={() => setIsAlertOpen(false)}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Create a Section</DialogTitle>
-              <DialogDescription>
-                Please create a section before adding question groups.
-              </DialogDescription>
-            </DialogHeader>
-            <Button variant="outline" onClick={() => setIsAlertOpen(false)}>Close</Button>
-          </DialogContent>
-        </Dialog>
-
-        {/* Toast UI */}
-        {isToastVisible && (
-          <Toast className="bg-green-500 text-white">
-            <div className="flex items-center gap-5">
-              <div className="flex items-center">
-                <div className="text-sm font-medium">Success</div>
-              </div>
-              <div className="ml-auto text-xs">
-                Test has been saved successfully
-              </div>
-            </div>
-          </Toast>
+        {/* Step 2: Select Questions */}
+        {currentStep === 2 && (
+          <StepTwoForm
+            handlePrevStep={handlePrevStep}
+            handleNextStep={handleNextStep}
+          />
         )}
 
-        <ToastViewport className="fixed bottom-0 right-0 m-8" />
+        {/* Step 3: Review & Submit (Placeholder) */}
+        {currentStep === 3 && (
+     <StepThreeForm handlePrevStep={handlePrevStep} />
+        )}
+
+       {/* Button Row */}
+<div className="w-full flex justify-start space-x-4">
+  {currentStep > 1 && (
+    <Button variant="secondary" onClick={handlePrevStep} className="w-full sm:w-auto">
+      Back
+    </Button>
+  )}
+
+  {currentStep < 3 && (
+    <Button
+      variant="default"
+      onClick={handleNextStep}
+      disabled={currentStep === 1 && !isStepOneValid()} // Disable "Next" in Step 1 if invalid
+      className="w-full sm:w-auto"
+    >
+      Next
+    </Button>
+  )}
+
+  {currentStep === 3 && (
+    <Button variant="default" className="w-full sm:w-auto">
+      Submit
+    </Button>
+  )}
+</div>
+
       </div>
-    </ToastProvider>
+    </div>
   )
 }

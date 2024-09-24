@@ -7,6 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
 model Assessment {
   id             Int              @id @default(autoincrement())
   name           String
@@ -17,6 +18,7 @@ model Assessment {
   questionGroups QuestionGroup[]   // One-to-many relation with QuestionGroup
 }
 
+
 model QuestionGroup {
   id            Int           @id @default(autoincrement())
   name          String
@@ -24,6 +26,7 @@ model QuestionGroup {
   assessment    Assessment?    @relation(fields: [assessmentId], references: [id])
   assessmentId  Int?           // Optional foreign key to Assessment
 }
+
 
 model Question {
   id                        Int          @id @default(autoincrement())
@@ -42,6 +45,7 @@ model Question {
   questionGroup              QuestionGroup @relation(fields: [questionGroupId], references: [id])
   questionGroupId            Int           // Foreign key to QuestionGroup
 }
+
 
 model Attribute {
   id        Int      @id @default(autoincrement())

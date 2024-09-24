@@ -1,25 +1,83 @@
 'use client'
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
-import { UploadIcon } from "lucide-react"
+import FamiliarWordRecognitionForm from "@/components/forms/questions/literacy/familiar-word-recognition";
+import ListeningComprehensionForm from "@/components/forms/questions/literacy/listening-comprehension";
+import NonWordRecognitionForm from "@/components/forms/questions/literacy/non-word-recognition";
+import OralReadingFluencyForm from "@/components/forms/questions/literacy/oral-reading-fluency"; // Add literacy forms
+import OralVocabularyForm from "@/components/forms/questions/literacy/oral-vocabulary";
+import ReadingComprehensionForm from "@/components/forms/questions/literacy/reading-comprehension";
+import SoundDiscriminationForm from "@/components/forms/questions/literacy/sound-discrimination";
+import ArithmeticCountingForm from "@/components/forms/questions/numeracy/arithmetic-counting";
+import ArithmeticFactsForm from "@/components/forms/questions/numeracy/arithmetic-facts";
+import ArithmeticProcessForm from "@/components/forms/questions/numeracy/arithmetic-process";
+import MissingNumberForm from "@/components/forms/questions/numeracy/missing-number";
+import ShapeRecognitionForm from "@/components/forms/questions/numeracy/shape-recognition";
+import WordProblemsForm from "@/components/forms/questions/numeracy/word-problems";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { QuestionType } from "@/config/question-types";
+import { Subject, SUBJECTS } from "@/config/subjects";
+import { useState } from "react";
 
 export default function CreateQuestion() {
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  // Set the state to be either Subject or null
+  const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null)
+  const [questionTypes, setQuestionTypes] = useState<QuestionType[]>([])
+  const [selectedQuestionType, setSelectedQuestionType] = useState<string | null>(null)
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string)
-      }
-      reader.readAsDataURL(file)
+  const handleSubjectChange = (value: string) => {
+    // Find the selected subject in the SUBJECTS array
+    const selected = SUBJECTS.find(subject => subject.name === value)
+    setSelectedSubject(selected || null) // Update the state with Subject or null
+    setQuestionTypes(selected ? selected.questionTypes : []) // Update question types based on selected subject
+  }
+
+  const handleQuestionTypeChange = (value: string) => {
+    setSelectedQuestionType(value) // Update question type
+  }
+
+  const renderForm = () => {
+    switch (selectedQuestionType) {
+      // Numeracy question types
+      case "Arithmetic Process":
+        return <ArithmeticProcessForm />
+      case "Arithmetic Facts":
+        return <ArithmeticFactsForm />
+      case "Counting":
+        return <ArithmeticCountingForm />
+      case "Missing Number":
+        return <MissingNumberForm />
+      case "Shape Recognition":
+        return <ShapeRecognitionForm />
+      case "Word Problem":
+        return <WordProblemsForm />
+
+      // Literacy question types
+      case "Oral Reading Fluency":
+        return <OralReadingFluencyForm />
+
+      case "Oral Vocabulary":
+        return <OralVocabularyForm />
+
+      case "Reading Comprehension":
+        return <ReadingComprehensionForm />
+
+      case "Listening Comprehension":
+        return <ListeningComprehensionForm />
+
+      case "Sound Discrimination":
+        return <SoundDiscriminationForm />
+
+      case "Familiar Word Recognition":
+        return <FamiliarWordRecognitionForm />
+        case "Non-Word Recognition":
+          return <NonWordRecognitionForm />
+      // Add other Literacy question types here as needed
+
+      default:
+        return <p>Please select a question type</p>
     }
   }
 
@@ -28,94 +86,44 @@ export default function CreateQuestion() {
       <Card className="w-full border-0 p-4">
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Subject Selection */}
             <div className="space-y-2">
               <Label htmlFor="subject">Subject</Label>
-              <Select>
-                <SelectTrigger id="subject">
+              <Select onValueChange={handleSubjectChange}>
+                <SelectTrigger>
                   <SelectValue placeholder="Select subject" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="maths">Mathematics</SelectItem>
-                  <SelectItem value="Language">Language</SelectItem>
-
+                  {SUBJECTS.map((subject, index) => (
+                    <SelectItem key={index} value={subject.name}>
+                      {subject.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="language">Language</Label>
-              <Select>
-                <SelectTrigger id="language">
-                  <SelectValue placeholder="Select language" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="english">English</SelectItem>
-                  <SelectItem value="hindi">Hindi</SelectItem>
-                  <SelectItem value="gujarati">Gujarati</SelectItem>
-                  <SelectItem value="kannada">Kannada</SelectItem>
-                  <SelectItem value="telugu">Telugu</SelectItem>
-                  <SelectItem value="tamil">Tamil</SelectItem>
-                  <SelectItem value="marathi">Marathi</SelectItem>
-                  <SelectItem value="punjabi">Punjabi</SelectItem>
-                  <SelectItem value="urdu">Urdu</SelectItem>
-                  <SelectItem value="odia">Odia</SelectItem>
-                </SelectContent>
 
-              </Select>
-            </div>
+            {/* Question Type Selection */}
             <div className="space-y-2">
               <Label htmlFor="questionType">Question Type</Label>
-              <Select>
+              <Select onValueChange={handleQuestionTypeChange}>
                 <SelectTrigger id="questionType">
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="multipleChoice">Multiple Choice</SelectItem>
-                  <SelectItem value="trueFalse">True/False</SelectItem>
-                  <SelectItem value="shortAnswer">Short Answer</SelectItem>
-                  <SelectItem value="essay">Essay</SelectItem>
+                  {questionTypes.map((type, index) => (
+                    <SelectItem key={index} value={type.name}>
+                      {type.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="image">Upload Image</Label>
-            <div className="flex items-center space-x-4">
-              <Input
-                id="image"
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleImageUpload}
-              />
-              <Label
-                htmlFor="image"
-                className="cursor-pointer flex items-center justify-center w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg hover:border-gray-400 transition-colors"
-              >
-                {imagePreview ? (
-                  <img src={imagePreview} alt="Preview" className="w-full h-full object-cover rounded-lg" />
-                ) : (
-                  <UploadIcon className="w-8 h-8 text-gray-400" />
-                )}
-              </Label>
-              {imagePreview && (
-                <Button variant="outline" onClick={() => setImagePreview(null)}>
-                  Remove Image
-                </Button>
-              )}
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="questionDescription">Question Description</Label>
-            <Textarea
-              id="questionDescription"
-              placeholder="Enter the question description here..."
-              className="min-h-[100px]"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="answer">Answer</Label>
-            <Textarea id="answer" placeholder="Enter the answer here..." className="min-h-[100px]" />
-          </div>
+
+          {/* Dynamic form rendering based on question type */}
+          {renderForm()}
+
         </CardContent>
         <CardFooter>
           <Button className="w-full">Save Question</Button>
@@ -124,3 +132,4 @@ export default function CreateQuestion() {
     </div>
   )
 }
+

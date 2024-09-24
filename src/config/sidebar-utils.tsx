@@ -12,6 +12,7 @@ import {
     Group,
     LayoutGridIcon,
     SettingsIcon,
+    ShieldQuestion,
     User,
     Users
 } from "lucide-react";
@@ -19,7 +20,7 @@ export type MenuItem = {
     id: string;
     title: string;
     href: string;
-    icon: React.ReactNode;
+    icon?: React.ReactNode;
     nested?: MenuItem[];
     active?: boolean; // Optional property to indicate if the item is active
 };
@@ -151,10 +152,13 @@ export const sidebarMenu: MenuItem[] = [
 
     {
         id: 'questionGroup',
-        title: 'Question Groups',
+        title: 'Subtests',
         href: '/question-groups',
         icon: <Group className="h-5 w-5" />,
     },
+
+    
+
     {
         id: 'questions',
         title: 'Questions',

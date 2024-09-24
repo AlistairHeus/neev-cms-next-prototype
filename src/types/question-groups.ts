@@ -36,97 +36,13 @@ export type Assessment = {
 export const dummyAssessments: Assessment[] = [
   {
     id: '1',
-    name: 'Math Assessment', // Name of the assessment
+    name: 'Maharashtra Phase 1 Assessment', // Name of the assessment
     medium: 'English', // Vernacular medium
-    createdBy: 'John Doe',
-    reviewers: ['Alice', 'Bob'],
+    createdBy: 'Kartik',
+    reviewers: ['Sangeeta', 'Rakesh'],
     status: 'Pending',
     questionGroups: [{ questions: ['Q1', 'Q2', 'Q3'] }]
   },
-  {
-    id: '2',
-    name: 'Science Assessment',
-    medium: 'Hindi',
-    createdBy: 'Jane Smith',
-    reviewers: ['Charlie', 'David'],
-    status: 'Published',
-    questionGroups: [{ questions: ['Q1', 'Q2'] }]
-  },
-  {
-    id: '3',
-    name: 'History Assessment',
-    medium: 'French',
-    createdBy: 'Samuel Green',
-    reviewers: ['Eve', 'Frank'],
-    status: 'Published',
-    questionGroups: [{ questions: ['Q1', 'Q2', 'Q3', 'Q4'] }]
-  },
-  {
-    id: '4',
-    name: 'Geography Assessment',
-    medium: 'Spanish',
-    createdBy: 'Diana Prince',
-    reviewers: ['Grace', 'Henry'],
-    status: 'Pending',
-    questionGroups: [{ questions: ['Q1'] }]
-  },
-  {
-    id: '5',
-    name: 'Physics Assessment',
-    medium: 'English',
-    createdBy: 'Bruce Wayne',
-    reviewers: ['Ivy', 'Jack'],
-    status: 'Published',
-    questionGroups: [{ questions: ['Q1', 'Q2', 'Q3', 'Q4', 'Q5'] }]
-  },
-  {
-    id: '6',
-    name: 'Physics Assessment',
-    medium: 'English',
-    createdBy: 'Bruce Wayne',
-    reviewers: ['Ivy', 'Jack'],
-    status: 'Published',
-    questionGroups: [{ questions: ['Q1', 'Q2', 'Q3', 'Q4', 'Q5'] }]
-  },
-  {
-    id: '7',
-    name: 'Physics Assessment',
-    medium: 'English',
-    createdBy: 'Bruce Wayne',
-    reviewers: ['Ivy', 'Jack'],
-    status: 'Published',
-    questionGroups: [{ questions: ['Q1', 'Q2', 'Q3', 'Q4', 'Q5'] }]
-  },
-  {
-    id: '8',
-    name: 'Physics Assessment',
-    medium: 'English',
-    createdBy: 'Bruce Wayne',
-    reviewers: ['Ivy', 'Jack'],
-    status: 'Published',
-    questionGroups: [{ questions: ['Q1', 'Q2', 'Q3', 'Q4', 'Q5'] }]
-  },
-  {
-    id: '9',
-    name: 'Physics Assessment',
-    medium: 'English',
-    createdBy: 'Bruce Wayne',
-    reviewers: ['Ivy', 'Jack'],
-    status: 'Published',
-    questionGroups: [{ questions: ['Q1', 'Q2', 'Q3', 'Q4', 'Q5'] }]
-  },
-  {
-    id: '10',
-    name: 'Physics Assessment',
-    medium: 'English',
-    createdBy: 'Bruce Wayne',
-    reviewers: ['Ivy', 'Jack'],
-    status: 'Published',
-    questionGroups: [{ questions: ['Q1', 'Q2', 'Q3', 'Q4', 'Q5'] }]
-  },
-
-
-  
 ];
 
 
