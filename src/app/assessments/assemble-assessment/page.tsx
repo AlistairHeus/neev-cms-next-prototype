@@ -3,48 +3,10 @@
 import { StepOneForm } from '@/components/forms/assessments/assemble-assessments/step-one'
 import StepThreeForm from '@/components/forms/assessments/assemble-assessments/step-three'
 import { StepTwoForm } from '@/components/forms/assessments/assemble-assessments/step-two'
+import { Stepper } from '@/components/forms/assessments/assemble-assessments/utils/form-stepper/form-stepper'
 import { Medium, Project, Subject } from '@/components/forms/form-utils/form-types'
 import { Button } from '@/components/ui/button'
 import { useState } from 'react'
-
-const Stepper = ({ currentStep }: { currentStep: number }) => {
-  const steps = ['Assessment Details', 'Select Questions', 'Review & Submit'];
-
-  return (
-    <div className="flex items-center justify-between mb-6 w-full lg:w-2/3 mx-auto">
-      {steps.map((step, index) => (
-        <div key={index} className="flex items-center">
-          {/* Step Number */}
-          <div
-            className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-              currentStep === index + 1 ? 'bg-black text-white' : 'text-black border-gray-400 border'
-            }`}
-            style={{ minWidth: '2rem', minHeight: '2rem' }}
-          >
-            {index + 1}
-          </div>
-
-          {/* Step Label */}
-          <span
-            className={`ml-2 font-semibold ${
-              currentStep === index + 1 ? 'text-black' : 'text-gray-500'
-            }`}
-            style={{ whiteSpace: 'nowrap' }}
-          >
-            {step}
-          </span>
-
-          {/* Divider Line */}
-          {index < steps.length - 1 && (
-            <div className="flex items-center mx-4 w-12 lg:w-24">
-              <div className={`w-full h-1 ${currentStep > index + 1 ? 'bg-black' : 'bg-gray-400'}`} />
-            </div>
-          )}
-        </div>
-      ))}
-    </div>
-  );
-};
 
 
 
@@ -70,16 +32,17 @@ export default function StepperForm() {
 
   const isStepOneValid = () => {
     const { assessmentName, project, grade, subject, medium } = formData
+    console.log("Form Data:", formData);
     return assessmentName && project && grade && subject && medium
   }
 
   const getAvailableGrades = () => {
     switch (formData.project) {
       case "Neev":
-        return [1, 2, 3]
+        return [{ label: "1", value: "1" }, { label: "2", value: "2" }, { label: "3", value: "3" }]
       case "Asset":
       case "Cares":
-        return [3, 4, 5, 6, 7, 8, 9, 10]
+        return [{ label: "3", value: "3" }, { label: "4", value: "4" }, { label: "5", value: "5" }, { label: "6", value: "6" }, { label: "7", value: "7" }, { label: "8", value: "8" }, { label: "9", value: "9" }, { label: "10", value: "10" }]
       default:
         return []
     }
@@ -88,83 +51,113 @@ export default function StepperForm() {
   const getAvailableSubjects = () => {
     switch (formData.project) {
       case "Cares":
-        return ["English", "Maths", "Science", "Social Science", "Hindi"]
+        return [
+          { _id: "5f9a572abb48fa346619c46e", name: "English" },
+          { _id: "5f9a572fbb48fa346619c46f", name: "Maths" },
+          { _id: "5f9a572abb48fa346619c470", name: "Science" },
+          { _id: "5f9a572fbb48fa346619c471", name: "Social Science" },
+          { _id: "5f9a572abb48fa346619c472", name: "Hindi" }
+        ];
       case "Asset":
-        return ["English", "Maths", "Science", "Social Studies", "Hindi"]
+        return [
+          { _id: "5f9a572abb48fa346619c473", name: "English" },
+          { _id: "5f9a572fbb48fa346619c476", name: "Social Studies" },
+          { _id: "5f9a572abb48fa346619c477", name: "Hindi" }
+        ];
       case "Neev":
-        return ["Foundational Literacy", "Foundational Numeracy"]
+        return [
+          { _id: "5f9a572abb48fa346619c46e", name: "Maths" },
+          { _id: "5f9a572fbb48fa346619c46f", name: "Language" }
+        ];
       default:
-        return []
+        return [];
     }
   }
 
   const getAvailableMediums = () => {
-    return ["English", "Hindi", "Gujarati", "Marathi", "Kannada"] // Available mediums (example list)
+    return [
+      { id: "5f9a56edbb48fa346619c166", name: "English" },
+      { id: "5f9a56fabb48fa346619c168", name: "Hindi" },
+      { id: "5fe3286c997e253a7f752a18", name: "Gujarati" },
+      { id: "618e1291b578f608d95e4571", name: "Kannada" },
+      { id: "618e15d8b578f608d95e4572", name: "Telugu" },
+      { id: "623181ba2d958875d7a12fc9", name: "Tamil" },
+      { id: "623181d72d958875d7a12fca", name: "Marathi" },
+      { id: "623181e72d958875d7a12fcb", name: "Punjabi" },
+      { id: "623181fa2d958875d7a12fcc", name: "Urdu" },
+      { id: "6231822b2d958875d7a12fcd", name: "Odia" }
+    ];
   }
 
   return (
-    <div className="flex justify-center w-full">
-      <div className="w-full bg-white rounded-lg p-6 space-y-6">
-        {/* Stepper Component */}
-        <Stepper currentStep={currentStep} />
+    <div className="flex justify-center w-full min-h-svh  overflow-scroll">
+      <div className="w-full flex flex-col bg-white border-t">
 
-        {/* Step 1: Assessment Details */}
-        {currentStep === 1 && (
-          <StepOneForm
-            assessmentName={formData.assessmentName}
-            setAssessmentName={(name: string) => setFormData((prev) => ({ ...prev, assessmentName: name }))}
-            project={formData.project}
-            setProject={(project: Project) => setFormData((prev) => ({ ...prev, project }))}
-            grade={formData.grade}
-            setGrade={(grade: number) => setFormData((prev) => ({ ...prev, grade }))}
-            subject={formData.subject}
-            setSubject={(subject: Subject) => setFormData((prev) => ({ ...prev, subject }))}
-            medium={formData.medium}
-            setMedium={(medium: Medium) => setFormData((prev) => ({ ...prev, medium }))}
-            getAvailableGrades={getAvailableGrades}
-            getAvailableSubjects={getAvailableSubjects}
-            getAvailableMediums={getAvailableMediums}
-          />
-        )}
+        <header className=''>
+          <Stepper currentStep={currentStep} />
+        </header>
 
-        {/* Step 2: Select Questions */}
-        {currentStep === 2 && (
-          <StepTwoForm
-            handlePrevStep={handlePrevStep}
-            handleNextStep={handleNextStep}
-          />
-        )}
 
-        {/* Step 3: Review & Submit (Placeholder) */}
-        {currentStep === 3 && (
-     <StepThreeForm handlePrevStep={handlePrevStep} />
-        )}
+        <main className='flex-grow w-full h-full'>
+          {/* Step 1: Assessment Details */}
+          {currentStep === 1 && (
+            <StepOneForm
+              assessmentName={formData.assessmentName}
+              setAssessmentName={(name: string) => setFormData((prev) => ({ ...prev, assessmentName: name }))}
+              project={formData.project}
+              setProject={(project: Project) => setFormData((prev) => ({ ...prev, project }))}
+              grade={formData.grade}
+              setGrade={(grade: number) => setFormData((prev) => ({ ...prev, grade }))}
+              subject={formData.subject}
+              setSubject={(subject: Subject) => setFormData((prev) => ({ ...prev, subject }))}
+              medium={formData.medium}
+              setMedium={(medium: Medium) => setFormData((prev) => ({ ...prev, medium }))}
+              getAvailableGrades={getAvailableGrades}
+              getAvailableSubjects={getAvailableSubjects}
+              getAvailableMediums={getAvailableMediums}
+            />
+          )}
+          {/* Step 2: Select Questions */}
+          {currentStep === 2 && (
+            <StepTwoForm
+              formData={formData}
+              handlePrevStep={handlePrevStep}
+              handleNextStep={handleNextStep}
+            />
+          )}
+          {/* Step 3: Review & Submit (Placeholder) */}
+          {currentStep === 3 && (
+            <StepThreeForm handlePrevStep={handlePrevStep} />
+          )}
+        </main>
 
-       {/* Button Row */}
-<div className="w-full flex justify-start space-x-4">
-  {currentStep > 1 && (
-    <Button variant="secondary" onClick={handlePrevStep} className="w-full sm:w-auto">
-      Back
-    </Button>
-  )}
 
-  {currentStep < 3 && (
-    <Button
-      variant="default"
-      onClick={handleNextStep}
-      disabled={currentStep === 1 && !isStepOneValid()} // Disable "Next" in Step 1 if invalid
-      className="w-full sm:w-auto"
-    >
-      Next
-    </Button>
-  )}
+        <footer>
+          <div className="w-full p-4 border-t border-b flex justify-start space-x-4">
+            {currentStep > 1 && (
+              <Button variant="secondary" onClick={handlePrevStep} className="w-full sm:w-auto">
+                Back
+              </Button>
+            )}
 
-  {currentStep === 3 && (
-    <Button variant="default" className="w-full sm:w-auto">
-      Submit
-    </Button>
-  )}
-</div>
+            {currentStep < 3 && (
+              <Button
+                variant="default"
+                onClick={handleNextStep}
+                disabled={currentStep === 1 && !isStepOneValid()} // Disable "Next" in Step 1 if invalid
+                className="w-full sm:w-auto"
+              >
+                Next
+              </Button>
+            )}
+
+            {currentStep === 3 && (
+              <Button variant="default" className="w-full sm:w-auto">
+                Submit
+              </Button>
+            )}
+          </div>
+        </footer>
 
       </div>
     </div>

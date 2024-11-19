@@ -1,3 +1,4 @@
+'use client'
 import "@/styles/globals.css"
 
 import type { Viewport } from "next"
@@ -6,6 +7,7 @@ import { Inter } from "next/font/google"
 import Sidebar from "@/components/layout/Sidebar"
 import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -63,6 +65,9 @@ export const viewport: Viewport = {
   ],
 }
 
+// Create a client
+const queryClient = new QueryClient();
+
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -79,11 +84,12 @@ export default function RootLayout({ children }: RootLayoutProps) {
           enableSystem
           disableTransitionOnChange
         >
-          <div className="w-full h-full flex">
-
-          <Sidebar/>
-          {children}
-          </div>
+          <QueryClientProvider client={queryClient}>
+            <div className="w-full h-full flex">
+              <Sidebar />
+              {children}
+            </div>
+          </QueryClientProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -1,142 +1,160 @@
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion"; // ShadCN Accordion
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"; // ShadCN Accordion
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Filter, PlusCircle } from "lucide-react"; // Lucide filter icon
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import QuestionDetailsDialog from "@/components/ui/QuestionDetailsDialog";
+import { Skeleton } from '@/components/ui/skeleton';
+import { useQuestions } from "@/data/hooks/useQuestions";
+import { useSubtests } from '@/data/hooks/useSubtests';
+import { ChevronLeft, ChevronRight, PlusCircle } from "lucide-react"; // Lucide filter icon
 import { useState } from "react";
-import { questionGroups } from "@/types/question-groups"; // Import questionGroups data
+import { Question } from "./assembly-types";
 
 export const QuestionSidebar = ({
+  formData,
   sections,
   addQuestionToSection,
+  addSubtestToSection,
+  activeSectionIndex,
 }: {
+  formData: any;
   sections: any[];
-  addQuestionToSection: (question: { id: number; text: string }, sectionIndex: number) => void;
+  addQuestionToSection: (question: Question, sectionIndex: number | null) => void;
+  addSubtestToSection: (subtest: any, sectionIndex: number | null) => void;
+  activeSectionIndex: number;
 }) => {
   const [filters, setFilters] = useState({
-    grade: "",
-    medium: "",
-    subject: "",
+    grade: formData.grade || "",
+    medium: formData.medium ? formData.medium.name : "",
+    subject: formData.subject ? formData.subject.name : "",
   });
 
-  const [expandedGroups, setExpandedGroups] = useState<number[]>([]); // State to manage expanded groups
+  const [currentPage, setCurrentPage] = useState(1);
+  const { data: questionData, isLoading: isQuestionsLoading, isError: isQuestionsError, error: questionsError } = useQuestions(formData.subject?._id, filters.medium, currentPage);
+  const { data: subtestData, isLoading: isSubtestsLoading, isError: isSubtestsError, error: subtestsError } = useSubtests(currentPage, formData.subject?._id);
 
-  // Function to apply filters (you can add real filtering logic here)
-  const applyFilters = () => {
-    // Example: You can filter the questionGroups based on the selected filters
-    console.log("Applying filters:", filters);
+  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
+
+  const toggleSidebar = () => {
+    setIsSidebarExpanded(!isSidebarExpanded);
+  };
+
+  const openQuestionDialog = (question: Question) => {
+    setSelectedQuestion(question);
+    setIsDialogOpen(true);
+  };
+
+  const handleAddQuestion = (question: Question) => {
+    console.log("Adding question to section:", question, "Active Section Index:", activeSectionIndex);
+    addQuestionToSection(question, activeSectionIndex);
   };
 
   return (
-    <aside className="w-1/2 space-y-6">
-      {/* Header: Filters text and filter icon */}
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="font-bold">Filters</h3>
-
-        {/* Filter Button to Open Dialog */}
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="ghost">
-              <Filter className="h-5 w-5" />
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Filter Questions</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              {/* Filter for Grade */}
-              <div className="space-y-2">
-                <label>Grade</label>
-                <Select
-                  onValueChange={(value) => setFilters({ ...filters, grade: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select Grade" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">Grade 1</SelectItem>
-                    <SelectItem value="2">Grade 2</SelectItem>
-                    <SelectItem value="3">Grade 3</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Filter for Medium */}
-              <div className="space-y-2">
-                <label>Medium</label>
-                <Select
-                  onValueChange={(value) => setFilters({ ...filters, medium: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select Medium" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="English">English</SelectItem>
-                    <SelectItem value="Hindi">Hindi</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Filter for Subject */}
-              <div className="space-y-2">
-                <label>Subject</label>
-                <Select
-                  onValueChange={(value) => setFilters({ ...filters, subject: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select Subject" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Math">Math</SelectItem>
-                    <SelectItem value="Science">Science</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Apply Filter Button */}
-              <Button onClick={applyFilters}>Apply Filters</Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+    <aside className={`transition-all duration-300 h-full ${isSidebarExpanded ? 'w-1/2' : 'w-16'}`}>
+      <div className={`w-full border-b px-4 py-4 flex justify-between`}>
+        <div className={`font-bold px-2 ${isSidebarExpanded ? 'block' : 'hidden'}`}>
+          Question Bank
+        </div>
+        <div className="border-2 w-6 h-6 flex items-center justify-center rounded-full border-black" onClick={toggleSidebar}>
+          {isSidebarExpanded ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+        </div>
       </div>
 
-      {/* Main section: List of question groups using ShadCN Accordions */}
-      <div>
-        <h3 className="font-bold mb-2">Available Question Groups</h3>
-        <Accordion type="multiple">
-          {questionGroups.map((group) => (
-            <AccordionItem key={group.id} value={`group-${group.id}`}>
-              <AccordionTrigger>{group.name}</AccordionTrigger>
-              <AccordionContent>
+      <div
+        className={`transition-opacity delay-[1000ms] duration-[1000ms] ease-in-out transform ${isSidebarExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-full'}`}
+        style={{ display: isSidebarExpanded ? 'block' : 'none' }}
+      >
+
+        <Accordion type="single" collapsible className="px-6 border-b">
+          <AccordionItem value="subtests">
+            <AccordionTrigger>
+              <h3 className={`transition-opacity duration-300 ${isSidebarExpanded ? 'opacity-100' : 'opacity-0'}`}>
+                Available Subtests
+              </h3>
+            </AccordionTrigger>
+            <AccordionContent className="px-4">
+              {isSubtestsError && (
+                <Alert variant="destructive" className="max-w-4xl mx-auto">
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription>{subtestsError?.message}</AlertDescription>
+                </Alert>
+              )}
+              {isSubtestsLoading && <Skeleton className="w-full h-[300px]" />}
+              {subtestData && subtestData.subtests && subtestData.subtests.length > 0 && (
+                <Accordion type="multiple">
+                  {subtestData.subtests.map((subtest) => (
+                    <AccordionItem key={subtest._id} value={`subtest-${subtest._id}`}>
+                      <AccordionTrigger>{subtest.name}</AccordionTrigger>
+                      <AccordionContent className="px-4">
+                        <ul>
+                          {subtest.questions.map((question: any) => (
+                            <li key={question._id} className="flex cursor-pointer justify-between items-center mt-2">
+                              <span className="cursor-pointer w-full" onClick={() => openQuestionDialog(question)}>{question.question.name}</span>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="ml-2"
+                                onClick={() => handleAddQuestion(question)}
+                              >
+                                <PlusCircle className="h-5 w-5" />
+                              </Button>
+                            </li>
+                          ))}
+                        </ul>
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              )}
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+
+
+        <Accordion type="single" collapsible className="px-6 border-b">
+          <AccordionItem value="questions">
+            <AccordionTrigger>
+              <h3 className={`transition-opacity duration-300 ${isSidebarExpanded ? 'opacity-100' : 'opacity-0'}`}>
+                Available Questions
+              </h3>
+            </AccordionTrigger>
+            <AccordionContent className="">
+              {isQuestionsError && (
+                <Alert variant="destructive" className="max-w-4xl mx-auto">
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription>{questionsError?.message}</AlertDescription>
+                </Alert>
+              )}
+              {isQuestionsLoading && <Skeleton className="w-full h-[300px]" />}
+              {questionData && questionData.questions && questionData.questions.length > 0 && (
                 <ul>
-                  {group.questions.map((question, index) => (
-                    <li key={index} className="flex justify-between items-center mt-2">
-                      <span>{question.question_stem}</span>
+                  {questionData.questions.map((question: Question) => (
+                    <li key={question._id} className="flex justify-between items-center mt-2">
+                      <span className="cursor-pointer w-full" onClick={() => openQuestionDialog(question)}>{question.question.name}</span>
                       <Button
                         variant="ghost"
                         size="icon"
                         className="ml-2"
-                        onClick={() =>
-                          addQuestionToSection(
-                            {
-                              id: question.attributes[0].id, // Updated to use question.attributes[0].id
-                              text: question.question_stem, // Passing question text
-                            },
-                            0 // Specify section index here for demo
-                          )
-                        }
+                        onClick={() => handleAddQuestion(question)}
                       >
                         <PlusCircle className="h-5 w-5" />
                       </Button>
                     </li>
                   ))}
                 </ul>
-              </AccordionContent>
-            </AccordionItem>
-          ))}
+              )}
+            </AccordionContent>
+          </AccordionItem>
         </Accordion>
+
+        <QuestionDetailsDialog
+          isOpen={isDialogOpen}
+          onClose={() => setIsDialogOpen(false)}
+          question={selectedQuestion}
+        />
       </div>
     </aside>
   );
 };
+

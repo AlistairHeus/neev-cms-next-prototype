@@ -1,8 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowUp, ArrowDown, Trash, MoreVertical, FileText } from "lucide-react"; // Lucide Icons
+import { ArrowUp, ArrowDown, Trash, MoreVertical, FileText, BookTemplate, LucideSave } from "lucide-react"; // Lucide Icons
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"; // ShadCN Dialog
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState } from "react";
+import { Question, QuestionOption, Subject } from "./assembly-types";
+import QuestionDetailsDialog from "@/components/ui/QuestionDetailsDialog";
+import { QuestionDisplayItem } from "@/components/forms/assessments/assemble-assessments/utils/question-display-item/question-display-item";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"; // Import ShadCN RadioGroup components
+import { Medium, Project } from "@/components/forms/form-utils/form-types";
+
+
 
 export const AssembledTestPreview = ({
   sections,
@@ -12,6 +20,7 @@ export const AssembledTestPreview = ({
   addSection,
   activeSectionIndex,
   setActiveSection,
+  formData,
 }: {
   sections: any[];
   setSections: (sections: any[]) => void;
@@ -20,7 +29,21 @@ export const AssembledTestPreview = ({
   addSection: () => void;
   activeSectionIndex: number | null; // Active section can be null
   setActiveSection: (sectionIndex: number) => void;
+  formData: {
+    assessmentName: string;
+    project: Project;
+    grade: number;
+    subject: Subject;
+    medium: Medium;
+  };
 }) => {
+  // Set the initial active section to the first section if not already set
+  if (activeSectionIndex === null && sections.length > 0) {
+    setActiveSection(0);
+  }
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
 
   // Remove a question from a section
   const removeQuestion = (sectionIndex: number, questionIndex: number) => {
@@ -40,7 +63,7 @@ export const AssembledTestPreview = ({
   const removeSection = (sectionIndex: number) => {
     const updatedSections = sections.filter((_, idx) => idx !== sectionIndex);
     setSections(updatedSections);
-  
+
     // If the removed section was active, reset the active section
     if (activeSectionIndex === sectionIndex || updatedSections.length === 0) {
       setActiveSection(null as any); // Type assertion to assign null
@@ -68,11 +91,21 @@ export const AssembledTestPreview = ({
     setSections(updatedSections);
   };
 
+  // Function to save a section as a subtest
+  const saveAsSubtest = (sectionIndex: number) => {
+    const sectionToSave = sections[sectionIndex];
+    // Implement the logic to save the section as a subtest
+    console.log("Saving section as subtest:", sectionToSave);
+  };
+
   return (
-    <main className="w-3/4 p-4">
+    <main className="w-full h-full border-l">
       {/* Header */}
-      <header className="flex justify-between items-center mb-4">
-        <h2 className="font-bold text-lg">Test Assembly Preview</h2>
+      <header className="flex justify-between items-center border-b py-2 px-2">
+        <h2 className=""><span className="font-bold">{formData.assessmentName}</span>
+          : Test Preview
+
+        </h2>
 
         {/* Options Icon Button with Dialog */}
         <Dialog>
@@ -111,87 +144,96 @@ export const AssembledTestPreview = ({
       </header>
 
       {/* Preview Sections */}
-      <div>
+      <div className="p-2">
         {sections.map((section, sectionIndex) => (
           <div
             key={sectionIndex}
-            className={`border p-4 mb-4 ${activeSectionIndex === sectionIndex ? "border-blue-500" : ""}`}
+            className={` border-2 rounded-md mb-4 ${activeSectionIndex === sectionIndex ? " border-2  border-black" : ""}`}
+            onClick={() => setActiveSection(sectionIndex)}
           >
-            <div className="flex justify-between items-center mb-2">
-              {/* Radio button to select active section */}
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  name="activeSection"
-                  value={sectionIndex}
-                  checked={activeSectionIndex === sectionIndex}
-                  onChange={() => setActiveSection(sectionIndex)}
-                  className="mr-2"
-                />
-                {`Section ${sectionIndex + 1}`}
-              </label>
+            <div className="flex justify-between items-center p-4">
+              <div className="">
+                Section {numberFormat === "normal" ? sectionIndex + 1 : convertToRoman(sectionIndex + 1)}
+                : &nbsp;
+                <span className="font-bold">
+                  {section.title}
+                </span>
+              </div>
 
-              {/* Button to remove section */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => removeSection(sectionIndex)}
-                className="ml-4"
-              >
-                <Trash className="h-5 w-5" />
-              </Button>
+              <div className="flex items-center space-x-2 flex-1 justify-end ">
+                <Button
+                  variant="default"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    saveAsSubtest(sectionIndex);
+                  }}
+                  className="flex gap-2 text-xs"
+                >
+                  <LucideSave className="h-5 w-5" />
+                  Save as new template
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="flex gap-2 text-xs"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <BookTemplate className="h-5 w-5" />
+                  Import Template
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeSection(sectionIndex);
+                  }}
+                >
+                  <Trash className="h-5 w-5" />
+                </Button>
+              </div>
             </div>
 
-            {/* Section Title Input */}
-            <Input
-              placeholder={`Enter Section Title`}
-              className="mb-2"
-              value={section.title || ""}
-              onChange={(e) => {
-                const newSections = sections.map((s, i) =>
-                  i === sectionIndex ? { ...s, title: e.target.value } : s
-                );
-                setSections(newSections); // Update the sections state
-              }}
-            />
-
+            <div className=" flex justify-between items-center pb-4 px-4">
+              <RadioGroup
+                value={String(activeSectionIndex)}
+                onValueChange={(value) => setActiveSection(Number(value))}
+                className="flex items-center flex-1"
+              >
+                <RadioGroupItem
+                  value={String(sectionIndex)}
+                  className="mr-2"
+                />
+              </RadioGroup>
+              <Input
+                placeholder={`Enter Section Title`}
+                className=""
+                value={section.title || ""}
+                onChange={(e) => {
+                  const newSections = sections.map((s, i) =>
+                    i === sectionIndex ? { ...s, title: e.target.value } : s
+                  );
+                  setSections(newSections); // Update the sections state
+                }}
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
             {/* List of Selected Questions */}
-            <ul>
-              {section.questions.map((question: { id: number, text: string }, questionIndex: number) => (
-                <li key={questionIndex} className="flex items-center mb-2">
-                  <span className="flex-1">
-                    {`Question ${
-                      numberFormat === "normal" ? questionIndex + 1 : convertToRoman(questionIndex + 1)
-                    }: ${question.text}`} (ID: {question.id})
-                  </span>
-
-                  {/* Move Up Button */}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => moveQuestion(sectionIndex, questionIndex, "up")}
-                  >
-                    <ArrowUp className="h-4 w-4" />
-                  </Button>
-
-                  {/* Move Down Button */}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => moveQuestion(sectionIndex, questionIndex, "down")}
-                  >
-                    <ArrowDown className="h-4 w-4" />
-                  </Button>
-
-                  {/* Remove Question Button */}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeQuestion(sectionIndex, questionIndex)}
-                  >
-                    <Trash className="h-4 w-4" />
-                  </Button>
-                </li>
+            <ul className="border-t">
+              {section.questions.map((question: Question, questionIndex: number) => (
+                <QuestionDisplayItem
+                  key={questionIndex}
+                  question={question}
+                  questionIndex={questionIndex}
+                  sectionIndex={sectionIndex}
+                  numberFormat={numberFormat}
+                  onQuestionClick={() => {
+                    console.log("Question clicked:", question);
+                    setSelectedQuestion(question);
+                    setIsDialogOpen(true);
+                  }}
+                  moveQuestion={moveQuestion}
+                  removeQuestion={removeQuestion}
+                />
               ))}
             </ul>
           </div>
@@ -200,6 +242,12 @@ export const AssembledTestPreview = ({
         {/* Add Section Button */}
         <Button onClick={addSection}>Add Section</Button>
       </div>
+
+      <QuestionDetailsDialog
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        question={selectedQuestion}
+      />
     </main>
   );
 };
