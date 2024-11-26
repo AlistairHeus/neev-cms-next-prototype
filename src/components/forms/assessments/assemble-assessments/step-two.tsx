@@ -46,15 +46,15 @@ export const StepTwoForm = ({ formData, handlePrevStep, handleNextStep }: any) =
 
   // Function to add a subtest to the active section
   const addSubtestToSection = (subtest: Subtest) => {
-    // if (activeSectionIndex === null) return; // No section selected
+    if (activeSectionIndex === null) return; // No section selected
 
-    // const updatedSections = sections.map((section, idx) => {
-    //   if (idx === activeSectionIndex) {
-    //     return { ...section, questions: [...section.questions, subtest] }; // Assuming subtest can be added to questions
-    //   }
-    //   return section;
-    // });
-    // setSections(updatedSections);
+    const updatedSections = sections.map((section, idx) => {
+      if (idx === activeSectionIndex) {
+        return { ...section, questions: [...section.questions, ...subtest.questions] }; // Assuming subtest.questions is an array of Question
+      }
+      return section;
+    });
+    setSections(updatedSections);
   };
 
   // Add a new section and set it as the active section

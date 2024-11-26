@@ -5,9 +5,9 @@ import QuestionDetailsDialog from "@/components/ui/QuestionDetailsDialog";
 import { Skeleton } from '@/components/ui/skeleton';
 import { useQuestions } from "@/data/hooks/useQuestions";
 import { useSubtests } from '@/data/hooks/useSubtests';
-import { ChevronLeft, ChevronRight, PlusCircle } from "lucide-react"; // Lucide filter icon
+import { ArrowRightCircle, ChevronLeft, ChevronRight, PlusCircle } from "lucide-react"; // Lucide filter icon
 import { useState } from "react";
-import { Question } from "./assembly-types";
+import { Question, Subtest } from "./assembly-types";
 
 export const QuestionSidebar = ({
   formData,
@@ -19,7 +19,7 @@ export const QuestionSidebar = ({
   formData: any;
   sections: any[];
   addQuestionToSection: (question: Question, sectionIndex: number | null) => void;
-  addSubtestToSection: (subtest: any, sectionIndex: number | null) => void;
+  addSubtestToSection: (subtest: Subtest) => void;
   activeSectionIndex: number;
 }) => {
   const [filters, setFilters] = useState({
@@ -50,6 +50,11 @@ export const QuestionSidebar = ({
     addQuestionToSection(question, activeSectionIndex);
   };
 
+  const handleAddSubtest = (subtest: any) => {
+    console.log("Adding subtest to section:", subtest);
+    addSubtestToSection(subtest);
+  };
+
   return (
     <aside className={`transition-all duration-300 h-full ${isSidebarExpanded ? 'w-1/2' : 'w-16'}`}>
       <div className={`w-full border-b px-4 py-4 flex justify-between`}>
@@ -73,7 +78,7 @@ export const QuestionSidebar = ({
                 Available Subtests
               </h3>
             </AccordionTrigger>
-            <AccordionContent className="px-4">
+            <AccordionContent className="">
               {isSubtestsError && (
                 <Alert variant="destructive" className="max-w-4xl mx-auto">
                   <AlertTitle>Error</AlertTitle>
@@ -84,8 +89,18 @@ export const QuestionSidebar = ({
               {subtestData && subtestData.subtests && subtestData.subtests.length > 0 && (
                 <Accordion type="multiple">
                   {subtestData.subtests.map((subtest) => (
-                    <AccordionItem key={subtest._id} value={`subtest-${subtest._id}`}>
-                      <AccordionTrigger>{subtest.name}</AccordionTrigger>
+                    <AccordionItem className="w-full " key={subtest._id} value={`subtest-${subtest._id}`}>
+                      <AccordionTrigger className="flex w- justify-between items-center">
+                        {subtest.name}
+                      </AccordionTrigger>
+                      <div
+                        className="m-0 p-0 cursor-pointer"
+                        onClick={() => handleAddSubtest(subtest)}
+                      >
+                        <ArrowRightCircle />
+                      </div>
+
+
                       <AccordionContent className="px-4">
                         <ul>
                           {subtest.questions.map((question: any) => (
@@ -101,6 +116,7 @@ export const QuestionSidebar = ({
                               </Button>
                             </li>
                           ))}
+
                         </ul>
                       </AccordionContent>
                     </AccordionItem>

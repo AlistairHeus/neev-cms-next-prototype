@@ -20,7 +20,7 @@ const fetchQuestions = async (
     page: currentPage.toString()
   });
 
-  const response = await fetch(`http://10.0.5.212:8181/api/questions?${params}`);
+  const response = await fetch(`http://localhost:8181/api/questions?${params}`);
 
   if (!response.ok) {
     throw new Error('Failed to fetch questions');
