@@ -97,7 +97,8 @@ interface QuestionOption {
   // Define the Section interface
   interface Section {
     title: string;
-    questions: (Question)[]; // Assuming questions can be of type Question or Subtest
+    questions: Question[]; // Assuming questions can be of type Question or Subtest
+    nestedSection?: Section | null; // Allow for one nested section
   }
   
 

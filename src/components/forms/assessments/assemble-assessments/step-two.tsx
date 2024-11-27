@@ -60,7 +60,15 @@ export const StepTwoForm = ({ formData, handlePrevStep, handleNextStep }: any) =
   // Add a new section and set it as the active section
   const addSection = () => {
     const newSectionIndex = sections.length; // Index of the new section
-    setSections([...sections, { title: "", questions: [] }]);
+    const newSection = { title: "", questions: [], nestedSection: null }; // Initialize with no nested section
+
+    // Check if the active section already has a nested section
+    if (activeSectionIndex !== null && sections[activeSectionIndex].nestedSection) {
+      console.error("Cannot add a nested section to this section as it already has one.");
+      return;
+    }
+
+    setSections([...sections, newSection]);
     setActiveSectionIndex(newSectionIndex); // Set the newly created section as the active one
   };
 
