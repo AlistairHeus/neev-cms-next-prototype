@@ -6,7 +6,7 @@ import { Project } from '../../form-utils/form-types'
 
 
 export const StepOneForm = ({
-  assessmentName, setAssessmentName, project, setProject, grade, setGrade, subject, setSubject, medium, setMedium, getAvailableGrades, getAvailableSubjects, getAvailableMediums
+  assessmentName, setAssessmentName, project, setProject, grade, setGrade, subject, setSubject, medium, setMedium, schoolDetails, setSchoolDetails, totalMarks, setTotalMarks, date, setDate, getAvailableGrades, getAvailableSubjects, getAvailableMediums
 }: any) => {
   return (
     <div className="w-full border-t p-4 space-y-6">
@@ -77,6 +77,48 @@ export const StepOneForm = ({
         />
       </div>
 
+
+      <div className="w-full grid grid-cols-4 gap-6">
+
+
+        {/* School Details (CARES) */}
+        <div className="space-y-2">
+          <label className="font-semibold text-lg">School Details</label>
+          <Input
+            type="text"
+            placeholder="Enter school details"
+            value={schoolDetails}
+            onChange={(e) => setSchoolDetails(e.target.value)}
+            className="w-full border-gray-300 rounded-md focus:border-black focus:ring-black"
+          />
+        </div>
+
+        {/* Total Marks */}
+        <div className="space-y-2">
+          <label className="font-semibold text-lg">Total Marks</label>
+          <Input
+            type="number"
+            placeholder="Enter total marks"
+            value={totalMarks}
+            onChange={(e) => setTotalMarks(Number(e.target.value))}
+            className="w-full border-gray-300 rounded-md focus:border-black focus:ring-black"
+          />
+        </div>
+
+        {/* Date */}
+        <div className="space-y-2">
+          <label className="font-semibold text-lg">Date</label>
+          <div className="relative w-full">
+            <Input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="w-full border-gray-300 rounded-md focus:border-black focus:ring-black"
+            />
+            {/* Optional: Add a calendar icon here if needed */}
+          </div>
+        </div>
+      </div>
 
     </div>
   );

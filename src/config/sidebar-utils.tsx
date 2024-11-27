@@ -102,9 +102,9 @@ export const sidebarMenu: MenuItem[] = [
     //             title: 'Content',
     //             href: '#',
     //             icon: <FilePenIcon className="h-5 w-5" />
-    
+
     //         },
-           
+
     //     ] 
     // },
     {
@@ -142,37 +142,37 @@ export const sidebarMenu: MenuItem[] = [
             {
                 id: 'review-asessment',
                 title: 'Review',
-                href: '/assessments/reviewed',
+                href: '/assessments/review',
                 icon: <FolderKanban className="h-5 w-5" />
             },
-            
+
         ]
 
     },
 
-    {
-        id: 'questionGroup',
-        title: 'Subtests',
-        href: '/question-groups',
-        icon: <Group className="h-5 w-5" />,
-    },
+    // {
+    //     id: 'questionGroup',
+    //     title: 'Subtests',
+    //     href: '/question-groups',
+    //     icon: <Group className="h-5 w-5" />,
+    // },
 
-    
 
-    {
-        id: 'questions',
-        title: 'Questions',
-        href: '/questions',
-        icon: <FileQuestion className="h-5 w-5" />,
-        nested: [
-            {
-                id: 'create-question',
-                title: "Create Question",
-                href: "/questions/create-question",
-                icon: <FileQuestion className="h-5 w-5" />
-            }
-        ]
-    },
+
+    // {
+    //     id: 'questions',
+    //     title: 'Questions',
+    //     href: '/questions',
+    //     icon: <FileQuestion className="h-5 w-5" />,
+    //     nested: [
+    //         {
+    //             id: 'create-question',
+    //             title: "Create Question",
+    //             href: "/questions/create-question",
+    //             icon: <FileQuestion className="h-5 w-5" />
+    //         }
+    //     ]
+    // },
     // {
     //     id: 'settings',
     //     title: 'Settings',

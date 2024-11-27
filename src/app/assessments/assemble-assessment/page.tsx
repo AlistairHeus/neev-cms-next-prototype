@@ -19,7 +19,10 @@ export default function StepperForm() {
     project: null as Project | null,
     grade: null as number | null,
     subject: null as Subject | null,
-    medium: null as Medium | null
+    medium: null as Medium | null,
+    schoolDetails: '',
+    totalMarks: null as number | null,
+    date: ''
   })
 
   const handleNextStep = () => {
@@ -112,6 +115,12 @@ export default function StepperForm() {
               setSubject={(subject: Subject) => setFormData((prev) => ({ ...prev, subject }))}
               medium={formData.medium}
               setMedium={(medium: Medium) => setFormData((prev) => ({ ...prev, medium }))}
+              schoolDetails={formData.schoolDetails}
+              setSchoolDetails={(details: string) => setFormData((prev) => ({ ...prev, schoolDetails: details }))}
+              totalMarks={formData.totalMarks}
+              setTotalMarks={(marks: number) => setFormData((prev) => ({ ...prev, totalMarks: marks }))}
+              date={formData.date}
+              setDate={(date: string) => setFormData((prev) => ({ ...prev, date }))}
               getAvailableGrades={getAvailableGrades}
               getAvailableSubjects={getAvailableSubjects}
               getAvailableMediums={getAvailableMediums}

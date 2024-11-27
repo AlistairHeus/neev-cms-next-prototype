@@ -5,9 +5,10 @@ import QuestionDetailsDialog from "@/components/ui/QuestionDetailsDialog";
 import { Skeleton } from '@/components/ui/skeleton';
 import { useQuestions } from "@/data/hooks/useQuestions";
 import { useSubtests } from '@/data/hooks/useSubtests';
-import { ArrowRightCircle, ChevronLeft, ChevronRight, PlusCircle } from "lucide-react"; // Lucide filter icon
+import { ArrowRightCircle, ChevronLeft, ChevronRight, PlusCircle, Search } from "lucide-react"; // Lucide filter icon
 import { useState } from "react";
 import { Question, Subtest } from "./assembly-types";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog"; // Import Dialog components
 
 export const QuestionSidebar = ({
   formData,
@@ -35,6 +36,8 @@ export const QuestionSidebar = ({
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
+  const [isSearchDialogOpen, setIsSearchDialogOpen] = useState(false); // State for search dialog
+  const [searchQuery, setSearchQuery] = useState(""); // State for search query
 
   const toggleSidebar = () => {
     setIsSidebarExpanded(!isSidebarExpanded);
@@ -55,22 +58,54 @@ export const QuestionSidebar = ({
     addSubtestToSection(subtest);
   };
 
+  // Filtered subtests and questions based on search query
+  const filteredSubtests = subtestData?.subtests.filter(subtest =>
+    subtest.name.toLowerCase().includes(searchQuery.toLowerCase())
+  ) || [];
+
+  const filteredQuestions = questionData?.questions.filter(question =>
+    question.question.name.toLowerCase().includes(searchQuery.toLowerCase())
+  ) || [];
+
   return (
     <aside className={`transition-all duration-300 h-full ${isSidebarExpanded ? 'w-1/2' : 'w-16'}`}>
       <div className={`w-full border-b px-4 py-4 flex justify-between`}>
         <div className={`font-bold px-2 ${isSidebarExpanded ? 'block' : 'hidden'}`}>
           Question Bank
         </div>
-        <div className="border-2 w-6 h-6 flex items-center justify-center rounded-full border-black" onClick={toggleSidebar}>
-          {isSidebarExpanded ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+        <div className="flex items-center">
+          <div className="border-2 w-6 h-6 flex items-center justify-center rounded-full border-black mr-2" onClick={toggleSidebar}>
+            {isSidebarExpanded ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+          </div>
+          <div className="w-6 h-6 flex items-center justify-center" onClick={() => setIsSearchDialogOpen(true)}>
+            <Search className="h-6 w-6" />
+          </div>
         </div>
       </div>
+
+      {/* Search Dialog */}
+      <Dialog open={isSearchDialogOpen} onOpenChange={setIsSearchDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Search Questions</DialogTitle>
+          </DialogHeader>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search for questions..."
+            className="border rounded p-2 w-full"
+          />
+          <DialogClose asChild>
+            <Button onClick={() => setIsSearchDialogOpen(false)}>Close</Button>
+          </DialogClose>
+        </DialogContent>
+      </Dialog>
 
       <div
         className={`transition-opacity delay-[1000ms] duration-[1000ms] ease-in-out transform ${isSidebarExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-full'}`}
         style={{ display: isSidebarExpanded ? 'block' : 'none' }}
       >
-
         <Accordion type="single" collapsible className="px-6 border-b">
           <AccordionItem value="subtests">
             <AccordionTrigger>
@@ -86,21 +121,22 @@ export const QuestionSidebar = ({
                 </Alert>
               )}
               {isSubtestsLoading && <Skeleton className="w-full h-[300px]" />}
-              {subtestData && subtestData.subtests && subtestData.subtests.length > 0 && (
+              {filteredSubtests.length > 0 && ( // Use filtered subtests
                 <Accordion type="multiple">
-                  {subtestData.subtests.map((subtest) => (
+                  {filteredSubtests.map((subtest) => (
                     <AccordionItem className="w-full " key={subtest._id} value={`subtest-${subtest._id}`}>
-                      <AccordionTrigger className="flex w- justify-between items-center">
+                      <AccordionTrigger className="flex w- justify-between items-center"
+                        additionalButton={
+                          <div
+                            className="m-0 p-0 cursor-pointer"
+                            onClick={() => handleAddSubtest(subtest)}
+                          >
+                            <ArrowRightCircle />
+                          </div>
+                        }
+                      >
                         {subtest.name}
                       </AccordionTrigger>
-                      <div
-                        className="m-0 p-0 cursor-pointer"
-                        onClick={() => handleAddSubtest(subtest)}
-                      >
-                        <ArrowRightCircle />
-                      </div>
-
-
                       <AccordionContent className="px-4">
                         <ul>
                           {subtest.questions.map((question: any) => (
@@ -116,7 +152,6 @@ export const QuestionSidebar = ({
                               </Button>
                             </li>
                           ))}
-
                         </ul>
                       </AccordionContent>
                     </AccordionItem>
@@ -126,7 +161,6 @@ export const QuestionSidebar = ({
             </AccordionContent>
           </AccordionItem>
         </Accordion>
-
 
         <Accordion type="single" collapsible className="px-6 border-b">
           <AccordionItem value="questions">
@@ -143,9 +177,9 @@ export const QuestionSidebar = ({
                 </Alert>
               )}
               {isQuestionsLoading && <Skeleton className="w-full h-[300px]" />}
-              {questionData && questionData.questions && questionData.questions.length > 0 && (
+              {filteredQuestions.length > 0 && ( // Use filtered questions
                 <ul>
-                  {questionData.questions.map((question: Question) => (
+                  {filteredQuestions.map((question: Question) => (
                     <li key={question._id} className="flex justify-between items-center mt-2">
                       <span className="cursor-pointer w-full" onClick={() => openQuestionDialog(question)}>{question.question.name}</span>
                       <Button
