@@ -10,18 +10,26 @@ import { useState } from "react";
 import { Question, Subtest } from "./assembly-types";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog"; // Import Dialog components
 
+
+
 export const QuestionSidebar = ({
   formData,
   sections,
-  addQuestionToSection,
+  addQuestionToActiveSection,
   addSubtestToSection,
   activeSectionIndex,
+  activeParentIndex,
+  setActiveParentIndex,
+  setSections,
 }: {
   formData: any;
   sections: any[];
-  addQuestionToSection: (question: Question, sectionIndex: number | null) => void;
+  addQuestionToActiveSection: (question: Question) => void;
   addSubtestToSection: (subtest: Subtest) => void;
-  activeSectionIndex: number;
+  activeSectionIndex: number | null;
+  activeParentIndex: number | null;
+  setActiveParentIndex: (index: number | null) => void;
+  setSections: (sections: any[]) => void;
 }) => {
   const [filters, setFilters] = useState({
     grade: formData.grade || "",
@@ -49,13 +57,111 @@ export const QuestionSidebar = ({
   };
 
   const handleAddQuestion = (question: Question) => {
-    console.log("Adding question to section:", question, "Active Section Index:", activeSectionIndex);
-    addQuestionToSection(question, activeSectionIndex);
+    console.log("Current state:", {
+      sections,
+      activeSectionIndex,
+      activeParentIndex,
+      question
+    });
+
+    if (activeSectionIndex === null) {
+      console.error("No active section selected");
+      return;
+    }
+
+    const updatedSections = structuredClone(sections);
+    const section = updatedSections[activeSectionIndex];
+
+    if (!section) {
+      console.error("Section not found");
+      return;
+    }
+
+    // Check if we're adding to a nested section
+    if (activeParentIndex !== null && section.nestedSections) {
+      // Ensure the nested section exists and has a questions array
+      if (!section.nestedSections[activeParentIndex]) {
+        section.nestedSections[activeParentIndex] = {
+          title: "",
+          questions: []
+        };
+      }
+
+      // Add question to the nested section
+      section.nestedSections[activeParentIndex].questions = [
+        ...(section.nestedSections[activeParentIndex].questions || []),
+        question
+      ];
+
+      console.log("Added to nested section:", {
+        parentIndex: activeSectionIndex,
+        nestedIndex: activeParentIndex,
+        updatedNestedSection: section.nestedSections[activeParentIndex]
+      });
+    } else {
+      // Add to parent section
+      section.questions = [...(section.questions || []), question];
+      console.log("Added to parent section:", {
+        parentIndex: activeSectionIndex,
+        updatedSection: section
+      });
+    }
+
+    setSections(updatedSections);
   };
 
-  const handleAddSubtest = (subtest: any) => {
-    console.log("Adding subtest to section:", subtest);
-    addSubtestToSection(subtest);
+  const handleAddSubtest = (subtest: Subtest) => {
+    console.log("Current state:", {
+      sections,
+      activeSectionIndex,
+      activeParentIndex,
+      subtest
+    });
+
+    if (activeSectionIndex === null) {
+      console.error("No active section selected");
+      return;
+    }
+
+    const updatedSections = structuredClone(sections);
+    const section = updatedSections[activeSectionIndex];
+
+    if (!section) {
+      console.error("Section not found");
+      return;
+    }
+
+    // Check if we're adding to a nested section
+    if (activeParentIndex !== null && section.nestedSections) {
+      // Ensure the nested section exists and has a questions array
+      if (!section.nestedSections[activeParentIndex]) {
+        section.nestedSections[activeParentIndex] = {
+          title: "",
+          questions: []
+        };
+      }
+
+      // Add subtest questions to the nested section
+      section.nestedSections[activeParentIndex].questions = [
+        ...(section.nestedSections[activeParentIndex].questions || []),
+        ...subtest.questions
+      ];
+
+      console.log("Added subtest to nested section:", {
+        parentIndex: activeSectionIndex,
+        nestedIndex: activeParentIndex,
+        updatedNestedSection: section.nestedSections[activeParentIndex]
+      });
+    } else {
+      // Add to parent section
+      section.questions = [...(section.questions || []), ...subtest.questions];
+      console.log("Added subtest to parent section:", {
+        parentIndex: activeSectionIndex,
+        updatedSection: section
+      });
+    }
+
+    setSections(updatedSections);
   };
 
   // Filtered subtests and questions based on search query

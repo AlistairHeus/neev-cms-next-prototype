@@ -98,11 +98,18 @@ interface QuestionOption {
   interface Section {
     title: string;
     questions: Question[]; // Assuming questions can be of type Question or Subtest
-    nestedSection?: Section | null; // Allow for one nested section
+    nestedSections?: Section[]; // Allow for multiple nested sections
+    options?: SectionOptions;
   }
   
 
 
+  interface SectionOptions {
+    isTimed: boolean;
+    timeLimit?: number; // in minutes
+    isOptional: boolean;
+    passingScore?: number;
+  }
 
   export type {
     Question,
@@ -113,5 +120,6 @@ interface QuestionOption {
     Qtype,
     Language,
     Section,
-    Subtest
+    Subtest,
+    SectionOptions
   }

@@ -1,22 +1,22 @@
 import { useState } from "react";
 import { QuestionSidebar } from "./utils/question-sidebar";
 import { AssembledTestPreview } from "./utils/assembled-test-preview";
-
-
 import { Section, Question, Subtest } from "./utils/assembly-types";
+
 export const StepTwoForm = ({ formData, handlePrevStep, handleNextStep }: any) => {
   const [sections, setSections] = useState<Section[]>([
-    { title: "Section 1", questions: [] },
+    { title: "Section 1", questions: [], nestedSections: [] },
   ]);
   const [numberFormat, setNumberFormat] = useState("normal");
-  const [activeSectionIndex, setActiveSectionIndex] = useState<number | null>(null); // Track the active section index
+  const [selectedSectionIndex, setSelectedSectionIndex] = useState<number | null>(null);
+  const [activeParentIndex, setActiveParentIndex] = useState<number | null>(null);
 
   // Function to toggle between normal and Roman numeral question number formats
   const toggleNumberFormat = () => {
     setNumberFormat((prevFormat) => (prevFormat === "normal" ? "roman" : "normal"));
   };
 
-  // Function to add a question to the active section from the sidebar
+  // Function to add a question to a specific section
   const addQuestionToSection = (question: Question, sectionIndex: number | null) => {
     if (sectionIndex === null || sectionIndex < 0 || sectionIndex >= sections.length) {
       console.error("Invalid section index:", sectionIndex);
@@ -30,7 +30,6 @@ export const StepTwoForm = ({ formData, handlePrevStep, handleNextStep }: any) =
     }
 
     const questionExists = section.questions.some((q: Question) => q._id === question._id);
-
     if (questionExists) {
       console.log("Question already exists in the section.");
       return;
@@ -46,50 +45,77 @@ export const StepTwoForm = ({ formData, handlePrevStep, handleNextStep }: any) =
 
   // Function to add a subtest to the active section
   const addSubtestToSection = (subtest: Subtest) => {
-    if (activeSectionIndex === null) return; // No section selected
+    if (selectedSectionIndex === null) return;
 
     const updatedSections = sections.map((section, idx) => {
-      if (idx === activeSectionIndex) {
-        return { ...section, questions: [...section.questions, ...subtest.questions] }; // Assuming subtest.questions is an array of Question
+      if (idx === selectedSectionIndex) {
+        return { ...section, questions: [...section.questions, ...subtest.questions] };
       }
       return section;
     });
     setSections(updatedSections);
   };
 
-  // Add a new section and set it as the active section
+  // Function to add a new section
   const addSection = () => {
-    const newSectionIndex = sections.length; // Index of the new section
-    const newSection = { title: "", questions: [], nestedSection: null }; // Initialize with no nested section
+    const newSection = { title: "", questions: [], nestedSections: [] };
+    setSections([...sections, newSection]);
+    setSelectedSectionIndex(sections.length); // Set the newly created section as the active one
+  };
 
-    // Check if the active section already has a nested section
-    if (activeSectionIndex !== null && sections[activeSectionIndex].nestedSection) {
-      console.error("Cannot add a nested section to this section as it already has one.");
+  // Function to handle section selection
+  const setActiveSection = (sectionIndex: number | null) => {
+    console.log("Setting active section:", sectionIndex);
+    setSelectedSectionIndex(sectionIndex);
+    // Only reset activeParentIndex if we're changing sections
+    if (sectionIndex !== selectedSectionIndex) {
+      setActiveParentIndex(null);
+    }
+  };
+
+  // Function to add a question to the active section
+  const addQuestionToActiveSection = (question: Question) => {
+    if (selectedSectionIndex === null) return;
+
+    const sectionToUpdate = sections[selectedSectionIndex];
+
+    if (!sectionToUpdate) {
+      console.error("Section to update is undefined.");
       return;
     }
 
-    setSections([...sections, newSection]);
-    setActiveSectionIndex(newSectionIndex); // Set the newly created section as the active one
-  };
+    const updatedSections = [...sections];
 
-  // Function to handle section selection (if you want to allow users to select which section is active)
-  const setActiveSection = (sectionIndex: number) => {
-    setActiveSectionIndex(sectionIndex);
+    if (sectionToUpdate.nestedSections && sectionToUpdate.nestedSections.length > 0) {
+      if (activeParentIndex !== null) {
+        const nestedSection = sectionToUpdate.nestedSections[activeParentIndex];
+        if (nestedSection) {
+          nestedSection.questions.push(question);
+        } else {
+          console.error("Nested section is undefined.");
+        }
+      } else {
+        console.error("Selected nested section index is null, cannot add question to nested section.");
+      }
+    } else {
+      updatedSections[selectedSectionIndex].questions.push(question);
+    }
+
+    setSections(updatedSections);
   };
 
   return (
     <div className="flex w-full h-full border-t">
-
-
-
-
       {/* Sidebar: Filters and Available Questions */}
       <QuestionSidebar
         formData={formData}
         sections={sections}
-        addQuestionToSection={addQuestionToSection}
+        addQuestionToActiveSection={addQuestionToActiveSection}
         addSubtestToSection={addSubtestToSection}
-        activeSectionIndex={activeSectionIndex ?? -1}
+        activeSectionIndex={selectedSectionIndex}
+        activeParentIndex={activeParentIndex}
+        setActiveParentIndex={setActiveParentIndex}
+        setSections={setSections}
       />
 
       {/* Main Preview Section */}
@@ -99,9 +125,11 @@ export const StepTwoForm = ({ formData, handlePrevStep, handleNextStep }: any) =
         numberFormat={numberFormat}
         toggleNumberFormat={toggleNumberFormat}
         addSection={addSection}
-        activeSectionIndex={activeSectionIndex} // Pass the active section index to display it in the UI
-        setActiveSection={setActiveSection} // Pass the function to allow users to change the active section
+        activeSectionIndex={selectedSectionIndex}
+        setActiveSection={setActiveSection}
         formData={formData}
+        activeParentIndex={activeParentIndex}
+        setActiveParentIndex={setActiveParentIndex}
       />
     </div>
   );

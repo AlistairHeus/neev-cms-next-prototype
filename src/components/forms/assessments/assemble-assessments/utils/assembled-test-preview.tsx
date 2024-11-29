@@ -22,6 +22,8 @@ export const AssembledTestPreview = ({
   activeSectionIndex,
   setActiveSection,
   formData,
+  activeParentIndex,
+  setActiveParentIndex,
 }: {
   sections: any[];
   setSections: (sections: any[]) => void;
@@ -29,7 +31,10 @@ export const AssembledTestPreview = ({
   toggleNumberFormat: () => void;
   addSection: () => void;
   activeSectionIndex: number | null; // Active section can be null
-  setActiveSection: (sectionIndex: number) => void;
+  setActiveSection: (sectionIndex: number | null) => void;
+  activeParentIndex: number | null; // Active Parent can be null
+  setActiveParentIndex: (sectionIndex: number | null) => void;
+
   formData: {
     assessmentName: string;
     project: Project;
@@ -105,9 +110,11 @@ export const AssembledTestPreview = ({
       <header className="flex justify-between items-center border-b py-2 px-2">
         <h2 className=""><span className="font-bold">{formData.assessmentName}</span>
           : Test Preview
-
         </h2>
 
+        <h4>
+          Max Marks: 100
+        </h4>
         {/* Options Icon Button with Dialog */}
         <Dialog>
           <DialogTrigger asChild>
@@ -146,22 +153,23 @@ export const AssembledTestPreview = ({
 
       {/* Preview Sections */}
       <div className="p-2">
-        {sections.map((section, sectionIndex) => (
+        {sections.map((section, index) => (
           <AssembledSection
-            key={sectionIndex}
+            key={index}
             section={section}
-            sections={sections}
-            sectionIndex={sectionIndex}
+            sectionIndex={index}
             activeSectionIndex={activeSectionIndex}
             setActiveSection={setActiveSection}
             removeSection={removeSection}
-            saveAsSubtest={saveAsSubtest}
             numberFormat={numberFormat}
+            sections={sections}
             setSections={setSections}
             moveQuestion={moveQuestion}
             setSelectedQuestion={setSelectedQuestion}
             setIsDialogOpen={setIsDialogOpen}
             removeQuestion={removeQuestion}
+            setActiveParentIndex={setActiveParentIndex}
+            activeParentIndex={activeParentIndex}
           />
         ))}
 
