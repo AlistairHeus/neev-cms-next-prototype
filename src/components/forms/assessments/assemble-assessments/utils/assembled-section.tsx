@@ -62,7 +62,7 @@ export const AssembledSection = ({
     return (
         <div className={`border-2 rounded-md mb-4 ${activeSectionIndex === sectionIndex ? "border-2 border-black" : ""}`}>
             {/* Parent Section Header */}
-            <Accordion type="single" collapsible className="w-full">
+            <Accordion type="single" collapsible className="w-full" defaultValue="section">
                 <AccordionItem value="section" className="border-none">
                     <AccordionTrigger className="px-4 hover:no-underline">
                         <div className="flex w-full items-center justify-between">
@@ -130,7 +130,13 @@ export const AssembledSection = ({
             {section.nestedSections && section.nestedSections.length > 0 && (
                 <div className="pl-8"> {/* Indentation for nested sections */}
                     {section.nestedSections.map((nestedSection: Section, index: number) => (
-                        <Accordion type="single" collapsible className="w-full" key={index}>
+                        <Accordion
+                            type="single"
+                            collapsible
+                            className="w-full"
+                            key={index}
+                            defaultValue="section"
+                        >
                             <NestedSection
                                 section={nestedSection}
                                 sectionIndex={index}

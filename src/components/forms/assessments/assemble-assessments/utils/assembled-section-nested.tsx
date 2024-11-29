@@ -67,7 +67,7 @@ export const NestedSection = ({
     };
 
     return (
-        <AccordionItem value={`nested-${sectionIndex}`} className="border rounded-md mb-2">
+        <AccordionItem value={`nested-${sectionIndex}`} className="border rounded-md mb-2" defaultValue={`nested-${sectionIndex}`}>
             <AccordionTrigger className="px-4 hover:no-underline">
                 <div className="flex w-full items-center justify-between">
 
