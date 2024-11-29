@@ -110,7 +110,7 @@ export const QuestionSidebar = ({
     setSections(updatedSections);
   };
 
-  const handleAddSubtest = (subtest: Subtest) => {
+  const handleAddSubtest = (subtest: any) => {
     console.log("Current state:", {
       sections,
       activeSectionIndex,
