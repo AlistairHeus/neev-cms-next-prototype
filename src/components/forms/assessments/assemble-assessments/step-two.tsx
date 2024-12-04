@@ -10,6 +10,8 @@ export const StepTwoForm = ({ formData, handlePrevStep, handleNextStep }: any) =
   const [numberFormat, setNumberFormat] = useState("normal");
   const [selectedSectionIndex, setSelectedSectionIndex] = useState<number | null>(null);
   const [activeParentIndex, setActiveParentIndex] = useState<number | null>(null);
+  const [addedQuestionIds, setAddedQuestionIds] = useState<string[]>([]);
+  const [addedSubtestIds, setAddedSubtestIds] = useState<string[]>([]);
 
   // Function to toggle between normal and Roman numeral question number formats
   const toggleNumberFormat = () => {
@@ -116,6 +118,10 @@ export const StepTwoForm = ({ formData, handlePrevStep, handleNextStep }: any) =
         activeParentIndex={activeParentIndex}
         setActiveParentIndex={setActiveParentIndex}
         setSections={setSections}
+        addedQuestionIds={addedQuestionIds}
+        setAddedQuestionIds={setAddedQuestionIds}
+        addedSubtestIds={addedSubtestIds}
+        setAddedSubtestIds={setAddedSubtestIds}
       />
 
       {/* Main Preview Section */}
@@ -130,6 +136,10 @@ export const StepTwoForm = ({ formData, handlePrevStep, handleNextStep }: any) =
         formData={formData}
         activeParentIndex={activeParentIndex}
         setActiveParentIndex={setActiveParentIndex}
+        setAddedQuestionIds={setAddedQuestionIds}
+        setAddedSubtestIds={setAddedSubtestIds}
+        addedQuestionIds={addedQuestionIds}
+        addedSubtestIds={addedSubtestIds}
       />
     </div>
   );

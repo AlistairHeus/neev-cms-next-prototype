@@ -4,7 +4,7 @@ import { ArrowUp, ArrowDown, Trash, MoreVertical, FileText, BookTemplate, Lucide
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"; // ShadCN Dialog
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
-import { Question, QuestionOption, Subject } from "./assembly-types";
+import { Question, QuestionOption, Section, Subject } from "./assembly-types";
 import QuestionDetailsDialog from "@/components/ui/QuestionDetailsDialog";
 import { QuestionDisplayItem } from "@/components/forms/assessments/assemble-assessments/utils/question-display-item/question-display-item";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"; // Import ShadCN RadioGroup components
@@ -24,6 +24,10 @@ export const AssembledTestPreview = ({
   formData,
   activeParentIndex,
   setActiveParentIndex,
+  setAddedQuestionIds,
+  setAddedSubtestIds,
+  addedQuestionIds,
+  addedSubtestIds,
 }: {
   sections: any[];
   setSections: (sections: any[]) => void;
@@ -42,6 +46,11 @@ export const AssembledTestPreview = ({
     subject: Subject;
     medium: Medium;
   };
+
+  setAddedQuestionIds: React.Dispatch<React.SetStateAction<string[]>>;
+  setAddedSubtestIds: React.Dispatch<React.SetStateAction<string[]>>;
+  addedQuestionIds: string[];
+  addedSubtestIds: string[];
 }) => {
   // Set the initial active section to the first section if not already set
   if (activeSectionIndex === null && sections.length > 0) {
@@ -51,32 +60,56 @@ export const AssembledTestPreview = ({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
 
-  // Remove a question from a section
+  // Update removeQuestion to handle subtest IDs
   const removeQuestion = (sectionIndex: number, questionIndex: number) => {
-    const updatedSections = sections.map((section, idx) => {
-      if (idx === sectionIndex) {
-        return {
-          ...section,
-          questions: section.questions.filter((_: { id: number, text: string }, qIdx: number) => qIdx !== questionIndex), // Explicitly typing `_`
-        };
-      }
-      return section;
-    });
+    const updatedSections = [...sections];
+    const removedQuestion = updatedSections[sectionIndex].questions[questionIndex];
+
+    // Remove the question from the section
+    updatedSections[sectionIndex].questions = updatedSections[sectionIndex].questions.filter((_: any, idx: number) => idx !== questionIndex);
     setSections(updatedSections);
+
+    // Check if the removed item is a subtest by checking for subtest-specific properties
+    const isSubtest = 'name' in removedQuestion && 'rules' in removedQuestion;
+
+    // Remove the ID from appropriate list
+    if (isSubtest) {
+      setAddedSubtestIds(prev => prev.filter(id => id !== removedQuestion._id));
+    } else {
+      setAddedQuestionIds(prev => prev.filter(id => id !== removedQuestion._id));
+    }
   };
 
-  // Remove a section
+  // Update removeSection to handle both questions and subtests
   const removeSection = (sectionIndex: number) => {
+    const removedSection = sections[sectionIndex];
+
+    // Get all question and subtest IDs from the removed section and its nested sections
+    const getAllIds = (section: Section): { questionIds: string[], subtestIds: string[] } => {
+      const ids = {
+        questionIds: section.questions.filter(q => !('name' in q && 'rules' in q)).map(q => q._id),
+        subtestIds: section.questions.filter(q => 'name' in q && 'rules' in q).map(q => q._id)
+      };
+
+      if (section.nestedSections) {
+        section.nestedSections.forEach((nestedSection: Section) => {
+          const nestedIds = getAllIds(nestedSection);
+          ids.questionIds.push(...nestedIds.questionIds);
+          ids.subtestIds.push(...nestedIds.subtestIds);
+        });
+      }
+      return ids;
+    };
+
+    const removedIds = getAllIds(removedSection);
+
+    // Remove the section
     const updatedSections = sections.filter((_, idx) => idx !== sectionIndex);
     setSections(updatedSections);
 
-    // If the removed section was active, reset the active section
-    if (activeSectionIndex === sectionIndex || updatedSections.length === 0) {
-      setActiveSection(null as any); // Type assertion to assign null
-    } else if (activeSectionIndex !== null && sectionIndex < activeSectionIndex) {
-      // Adjust the active section index if the removed section was before the active one
-      setActiveSection(activeSectionIndex - 1);
-    }
+    // Remove IDs from respective lists
+    setAddedQuestionIds(prev => prev.filter(id => !removedIds.questionIds.includes(id)));
+    setAddedSubtestIds(prev => prev.filter(id => !removedIds.subtestIds.includes(id)));
   };
 
   // Move a question up or down within a section

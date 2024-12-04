@@ -48,7 +48,7 @@ interface FetchSubtestsResponse {
 }
 
 const fetchSubtests = async (page: number, subject: string): Promise<FetchSubtestsResponse> => {
-    const response = await fetch(`http://localhost:8181/api/subtests/subtests-with-questions?page=${page}&subject=${subject}`);
+    const response = await fetch(`http://10.0.5.212:8181/api/subtests/subtests-with-questions?page=${page}&subject=${subject}`);
     if (!response.ok) {
         throw new Error('Failed to fetch subtests');
     }

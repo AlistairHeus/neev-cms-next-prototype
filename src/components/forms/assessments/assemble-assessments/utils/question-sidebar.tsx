@@ -21,6 +21,10 @@ export const QuestionSidebar = ({
   activeParentIndex,
   setActiveParentIndex,
   setSections,
+  addedQuestionIds,
+  setAddedQuestionIds,
+  addedSubtestIds,
+  setAddedSubtestIds,
 }: {
   formData: any;
   sections: any[];
@@ -30,6 +34,10 @@ export const QuestionSidebar = ({
   activeParentIndex: number | null;
   setActiveParentIndex: (index: number | null) => void;
   setSections: (sections: any[]) => void;
+  addedQuestionIds: string[];
+  setAddedQuestionIds: React.Dispatch<React.SetStateAction<string[]>>;
+  addedSubtestIds: string[];
+  setAddedSubtestIds: React.Dispatch<React.SetStateAction<string[]>>;
 }) => {
   const [filters, setFilters] = useState({
     grade: formData.grade || "",
@@ -57,121 +65,27 @@ export const QuestionSidebar = ({
   };
 
   const handleAddQuestion = (question: Question) => {
-    console.log("Current state:", {
-      sections,
-      activeSectionIndex,
-      activeParentIndex,
-      question
-    });
-
-    if (activeSectionIndex === null) {
-      console.error("No active section selected");
-      return;
-    }
-
-    const updatedSections = structuredClone(sections);
-    const section = updatedSections[activeSectionIndex];
-
-    if (!section) {
-      console.error("Section not found");
-      return;
-    }
-
-    // Check if we're adding to a nested section
-    if (activeParentIndex !== null && section.nestedSections) {
-      // Ensure the nested section exists and has a questions array
-      if (!section.nestedSections[activeParentIndex]) {
-        section.nestedSections[activeParentIndex] = {
-          title: "",
-          questions: []
-        };
-      }
-
-      // Add question to the nested section
-      section.nestedSections[activeParentIndex].questions = [
-        ...(section.nestedSections[activeParentIndex].questions || []),
-        question
-      ];
-
-      console.log("Added to nested section:", {
-        parentIndex: activeSectionIndex,
-        nestedIndex: activeParentIndex,
-        updatedNestedSection: section.nestedSections[activeParentIndex]
-      });
-    } else {
-      // Add to parent section
-      section.questions = [...(section.questions || []), question];
-      console.log("Added to parent section:", {
-        parentIndex: activeSectionIndex,
-        updatedSection: section
-      });
-    }
-
-    setSections(updatedSections);
+    addQuestionToActiveSection(question);
+    setAddedQuestionIds(prev => [...prev, question._id]);
   };
 
   const handleAddSubtest = (subtest: any) => {
-    console.log("Current state:", {
-      sections,
-      activeSectionIndex,
-      activeParentIndex,
-      subtest
-    });
-
-    if (activeSectionIndex === null) {
-      console.error("No active section selected");
-      return;
-    }
-
-    const updatedSections = structuredClone(sections);
-    const section = updatedSections[activeSectionIndex];
-
-    if (!section) {
-      console.error("Section not found");
-      return;
-    }
-
-    // Check if we're adding to a nested section
-    if (activeParentIndex !== null && section.nestedSections) {
-      // Ensure the nested section exists and has a questions array
-      if (!section.nestedSections[activeParentIndex]) {
-        section.nestedSections[activeParentIndex] = {
-          title: "",
-          questions: []
-        };
-      }
-
-      // Add subtest questions to the nested section
-      section.nestedSections[activeParentIndex].questions = [
-        ...(section.nestedSections[activeParentIndex].questions || []),
-        ...subtest.questions
-      ];
-
-      console.log("Added subtest to nested section:", {
-        parentIndex: activeSectionIndex,
-        nestedIndex: activeParentIndex,
-        updatedNestedSection: section.nestedSections[activeParentIndex]
-      });
-    } else {
-      // Add to parent section
-      section.questions = [...(section.questions || []), ...subtest.questions];
-      console.log("Added subtest to parent section:", {
-        parentIndex: activeSectionIndex,
-        updatedSection: section
-      });
-    }
-
-    setSections(updatedSections);
+    addSubtestToSection(subtest);
+    setAddedSubtestIds(prev => [...prev, subtest._id]);
   };
 
   // Filtered subtests and questions based on search query
-  const filteredSubtests = subtestData?.subtests.filter(subtest =>
-    subtest.name.toLowerCase().includes(searchQuery.toLowerCase())
-  ) || [];
+  const filteredSubtests = subtestData?.subtests
+    .filter(subtest => !addedSubtestIds.includes(subtest._id))
+    .filter(subtest =>
+      subtest.name.toLowerCase().includes(searchQuery.toLowerCase())
+    ) || [];
 
-  const filteredQuestions = questionData?.questions.filter(question =>
-    question.question.name.toLowerCase().includes(searchQuery.toLowerCase())
-  ) || [];
+  const filteredQuestions = questionData?.questions
+    .filter(question => !addedQuestionIds.includes(question._id))
+    .filter(question =>
+      question.question.name.toLowerCase().includes(searchQuery.toLowerCase())
+    ) || [];
 
   return (
     <aside className={`transition-all duration-300 h-full ${isSidebarExpanded ? 'w-1/2' : 'w-16'}`}>
